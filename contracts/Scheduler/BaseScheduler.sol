@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/Interface/RequestFactoryInterface.sol";
 import "contracts/Interface/SchedulerInterface.sol";
@@ -19,13 +19,13 @@ contract BaseScheduler is SchedulerInterface {
     RequestScheduleLib.TemporalUnit public temporalUnit;
 
     // The address which will be sent the fee payments.
-    address public feeRecipient;
+    address payable public feeRecipient;
 
     /*
      * @dev Fallback function to be able to receive ether. This can occur
      *  legitimately when scheduling fails due to a validation error.
      */
-    function() public payable {}
+    function() external payable {}
 
     /// Event that bubbles up the address of new requests made with this scheduler.
     event NewRequest(address request);
@@ -42,12 +42,12 @@ contract BaseScheduler is SchedulerInterface {
      * @param _uintArgs [5] The fee attached to this transaction.
      * @param _uintArgs [6] The bounty attached to this transaction.
      * @param _uintArgs [7] The deposit required to claim this transaction.
-     * @return The address of the new TransactionRequest.   
-     */ 
+     * @return The address of the new TransactionRequest.
+     */
     function schedule (
-        address   _toAddress,
-        bytes     _callData,
-        uint[8]   _uintArgs
+        address payable         _toAddress,
+        bytes memory    _callData,
+        uint[8] memory  _uintArgs
     )
         public payable returns (address newRequest)
     {
@@ -114,7 +114,7 @@ contract BaseScheduler is SchedulerInterface {
             revert();
         }
 
-        require(newRequest != 0x0);
+        require(newRequest != address(0));
         emit NewRequest(newRequest);
         return newRequest;
     }

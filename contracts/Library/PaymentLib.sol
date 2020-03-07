@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/zeppelin/SafeMath.sol";
 
@@ -6,7 +6,7 @@ import "contracts/zeppelin/SafeMath.sol";
  * Library containing the functionality for the bounty and fee payments.
  * - Bounty payments are the reward paid to the executing agent of transaction
  * requests.
- * - Fee payments are the cost of using a Scheduler to make transactions. It is 
+ * - Fee payments are the cost of using a Scheduler to make transactions. It is
  * a way for developers to monetize their work on the EAC.
  */
 library PaymentLib {
@@ -15,13 +15,13 @@ library PaymentLib {
     struct PaymentData {
         uint bounty;                /// The amount in wei to be paid to the executing agent of the TransactionRequest.
 
-        address bountyBenefactor;   /// The address that the bounty will be sent to.
+        address payable bountyBenefactor;   /// The address that the bounty will be sent to.
 
         uint bountyOwed;            /// The amount that is owed to the bountyBenefactor.
 
         uint fee;                   /// The amount in wei that will be paid to the FEE_RECIPIENT address.
 
-        address feeRecipient;       /// The address that the fee will be sent to.
+        address payable feeRecipient;       /// The address that the fee will be sent to.
 
         uint feeOwed;               /// The amount that is owed to the feeRecipient.
     }
@@ -36,13 +36,13 @@ library PaymentLib {
     function hasFeeRecipient(PaymentData storage self)
         internal view returns (bool)
     {
-        return self.feeRecipient != 0x0;
+        return self.feeRecipient != address(0);
     }
 
     /**
-     * @dev Computes the amount to send to the feeRecipient. 
+     * @dev Computes the amount to send to the feeRecipient.
      */
-    function getFee(PaymentData storage self) 
+    function getFee(PaymentData storage self)
         internal view returns (uint)
     {
         return self.fee;
@@ -56,7 +56,7 @@ library PaymentLib {
     {
         return self.bounty;
     }
- 
+
     /**
      * @dev Computes the amount to send to the address that fulfilled the request
      *       with an additional modifier. This is used when the call was claimed.
@@ -75,7 +75,7 @@ library PaymentLib {
      * @dev Send the feeOwed amount to the feeRecipient.
      * Note: The send is allowed to fail.
      */
-    function sendFee(PaymentData storage self) 
+    function sendFee(PaymentData storage self)
         internal returns (bool)
     {
         uint feeAmount = self.feeOwed;
@@ -120,7 +120,7 @@ library PaymentLib {
         uint _callValue,
         uint _gasPrice,
         uint _gasOverhead
-    ) 
+    )
         public pure returns (uint)
     {
         return _bounty

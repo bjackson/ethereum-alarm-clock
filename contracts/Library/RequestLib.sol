@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/Library/ClaimLib.sol";
 import "contracts/Library/ExecutionLib.sol";
@@ -44,11 +44,11 @@ library RequestLib {
      * @dev Validate the initialization parameters of a transaction request.
      */
     function validate(
-        address[4]  _addressArgs,
-        uint[12]    _uintArgs,
-        uint        _endowment
-    ) 
-        public view returns (bool[6] isValid)
+        address payable[4] memory _addressArgs,
+        uint[12] memory   _uintArgs,
+        uint              _endowment
+    )
+        public view returns (bool[6] memory isValid)
     {
         // The order of these errors matters as it determines which
         // ValidationError event codes are logged when validation fails.
@@ -85,18 +85,18 @@ library RequestLib {
      */
     function initialize(
         Request storage self,
-        address[4]      _addressArgs,
-        uint[12]        _uintArgs,
-        bytes           _callData
-    ) 
+        address payable[4] memory     _addressArgs,
+        uint[12] memory       _uintArgs,
+        bytes memory          _callData
+    )
         public returns (bool)
     {
-        address[6] memory addressValues = [
-            0x0,                // self.claimData.claimedBy
+        address payable[6] memory addressValues = [
+            address(0),                // self.claimData.claimedBy
             _addressArgs[0],    // self.meta.createdBy
             _addressArgs[1],    // self.meta.owner
             _addressArgs[2],    // self.paymentData.feeRecipient
-            0x0,                // self.paymentData.bountyBenefactor
+            address(0),                // self.paymentData.bountyBenefactor
             _addressArgs[3]     // self.txnData.toAddress
         ];
 
@@ -128,9 +128,9 @@ library RequestLib {
 
         return true;
     }
- 
+
     function serialize(Request storage self)
-        internal view returns(address[6], bool[3], uint[15], uint8[1])
+        internal view returns(address[6] memory, bool[3] memory, uint[15] memory, uint8[1] memory)
     {
         address[6] memory addressValues = [
             self.claimData.claimedBy,
@@ -179,11 +179,11 @@ library RequestLib {
      */
     function deserialize(
         Request storage self,
-        address[6]  _addressValues,
-        bool[3]     _boolValues,
-        uint[15]    _uintValues,
-        uint8[1]    _uint8Values,
-        bytes       _callData
+        address payable[6] memory _addressValues,
+        bool[3] memory    _boolValues,
+        uint[15] memory   _uintValues,
+        uint8[1] memory   _uint8Values,
+        bytes memory      _callData
     )
         internal returns (bool)
     {
@@ -226,7 +226,7 @@ library RequestLib {
         return true;
     }
 
-    function execute(Request storage self) 
+    function execute(Request storage self)
         internal returns (bool)
     {
         /*
@@ -250,7 +250,7 @@ library RequestLib {
          *         - block.number <= windowStart + windowSize
          *     else:
          *         - throw (should be impossible)
-         *  
+         *
          *  6. gasleft() == callGas
          *  7. tx.gasprice >= txnData.gasPrice
          *
@@ -315,7 +315,7 @@ library RequestLib {
 
         // Send the transaction...
         // The transaction is allowed to fail and the executing agent will still get the bounty.
-        // `.sendTransaction()` will return false on a failed exeuction. 
+        // `.sendTransaction()` will return false on a failed exeuction.
         self.meta.wasSuccessful = self.txnData.sendTransaction();
 
         // +----------------+
@@ -373,7 +373,7 @@ library RequestLib {
         // Log the bounty and fee. Otherwise it is non-trivial to figure
         // out how much was payed.
         emit Executed(self.paymentData.bountyOwed, totalFeePayment, measuredGasConsumption);
-    
+
         // Attempt to send the bounty. as with `.sendFee()` it may fail and need to be caled after execution.
         self.paymentData.sendBounty();
 
@@ -392,7 +392,7 @@ library RequestLib {
     // `TransactionRequest.execute()` contract into the `RequestLib.execute()`
     // method at the point where the gas check happens.
     uint public constant PRE_EXECUTION_GAS = 25000;   // TODO is this number still accurate?
-    
+
     /*
      * The amount of gas needed to complete the execute method after
      * the transaction has been sent.
@@ -415,8 +415,8 @@ library RequestLib {
     {
         return EXECUTION_GAS_OVERHEAD;
     }
-    
-    function requiredExecutionGas(Request storage self) 
+
+    function requiredExecutionGas(Request storage self)
         public view returns (uint requiredGas)
     {
         requiredGas = self.txnData.callGas.add(EXECUTION_GAS_OVERHEAD);
@@ -431,7 +431,7 @@ library RequestLib {
      *    * not wasCalled && afterExecutionWindow
      *    * not claimed && beforeFreezeWindow && msg.sender == owner
      */
-    function isCancellable(Request storage self) 
+    function isCancellable(Request storage self)
         public view returns (bool)
     {
         if (self.meta.isCancelled) {
@@ -455,7 +455,7 @@ library RequestLib {
      *  payment is issued to the party that cancels the request if they are not
      *  the owner.
      */
-    function cancel(Request storage self) 
+    function cancel(Request storage self)
         public returns (bool)
     {
         uint startGas = gasleft();
@@ -477,7 +477,7 @@ library RequestLib {
         // since the `isCancellable()` function checks this.
         if (msg.sender != self.meta.owner) {
             // Create the rewardBenefactor
-            address rewardBenefactor = msg.sender;
+            address payable rewardBenefactor = msg.sender;
             // Create the rewardOwed variable, it is one-hundredth
             // of the bounty.
             uint rewardOwed = self.paymentData.bountyOwed
@@ -513,7 +513,7 @@ library RequestLib {
      * @dev Performs some checks to verify that a transaction request is claimable.
      * @param self The Request object.
      */
-    function isClaimable(Request storage self) 
+    function isClaimable(Request storage self)
         internal view returns (bool)
     {
         // Require not claimed and not cancelled.
@@ -531,11 +531,11 @@ library RequestLib {
      * @param self The Request object.
      * Payable because it requires the sender to send enough ether to cover the claimDeposit.
      */
-    function claim(Request storage self) 
+    function claim(Request storage self)
         internal returns (bool claimed)
     {
         require(isClaimable(self));
-        
+
         emit Claimed();
         return self.claimData.claim(self.schedule.computePaymentModifier());
     }
@@ -554,7 +554,7 @@ library RequestLib {
      * Send fee. Wrapper over the real function that perform an extra
      * check to see if it's after the execution window (and thus the first transaction failed)
      */
-    function sendFee(Request storage self) 
+    function sendFee(Request storage self)
         public returns (bool)
     {
         if (self.schedule.isAfterWindow()) {
@@ -567,7 +567,7 @@ library RequestLib {
      * Send bounty. Wrapper over the real function that performs an extra
      * check to see if it's after execution window (and thus the first transaction failed)
      */
-    function sendBounty(Request storage self) 
+    function sendBounty(Request storage self)
         public returns (bool)
     {
         /// check wasCalled
@@ -577,20 +577,20 @@ library RequestLib {
         return false;
     }
 
-    function canSendOwnerEther(Request storage self) 
-        public view returns(bool) 
+    function canSendOwnerEther(Request storage self)
+        public view returns(bool)
     {
         return self.meta.isCancelled || self.schedule.isAfterWindow() || self.meta.wasCalled;
     }
 
     /**
-     * Send owner ether. Wrapper over the real function that performs an extra 
+     * Send owner ether. Wrapper over the real function that performs an extra
      * check to see if it's after execution window (and thus the first transaction failed)
      */
-    function sendOwnerEther(Request storage self, address recipient)
+    function sendOwnerEther(Request storage self, address payable recipient)
         public returns (bool)
     {
-        require(recipient != 0x0);
+        require(recipient != address(0));
         if(canSendOwnerEther(self) && msg.sender == self.meta.owner) {
             return _sendOwnerEther(self, recipient);
         }
@@ -598,7 +598,7 @@ library RequestLib {
     }
 
     /**
-     * Send owner ether. Wrapper over the real function that performs an extra 
+     * Send owner ether. Wrapper over the real function that performs an extra
      * check to see if it's after execution window (and thus the first transaction failed)
      */
     function sendOwnerEther(Request storage self)
@@ -610,7 +610,7 @@ library RequestLib {
         return false;
     }
 
-    function _sendOwnerEther(Request storage self, address recipient) 
+    function _sendOwnerEther(Request storage self, address payable recipient)
         private returns (bool)
     {
         // Note! This does not do any checks since it is used in the execute function.

@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 /// Truffle-specific contract (Not a part of the EAC)
 
@@ -13,7 +13,7 @@ contract Migrations {
         }
     }
 
-    function Migrations()  public {
+    constructor()  public {
         owner = msg.sender;
     }
 

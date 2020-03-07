@@ -1,7 +1,7 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 contract TransactionRecorder {
-    address owner;
+    address payable owner;
 
     bool public wasCalled;
     uint public lastCallValue;
@@ -9,11 +9,11 @@ contract TransactionRecorder {
     bytes public lastCallData = "";
     uint public lastCallGas;
 
-    function TransactionRecorder()  public {
+    constructor()  public {
         owner = msg.sender;
     }
 
-    function() payable  public {
+    function() external payable {
         lastCallGas = gasleft();
         lastCallData = msg.data;
         lastCaller = msg.sender;
@@ -24,7 +24,7 @@ contract TransactionRecorder {
     function __reset__() public {
         lastCallGas = 0;
         lastCallData = "";
-        lastCaller = 0x0;
+        lastCaller = address(0);
         lastCallValue = 0;
         wasCalled = false;
     }

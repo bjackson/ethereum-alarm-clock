@@ -1,26 +1,26 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/Interface/SchedulerInterface.sol";
 
 /// Example of using the Scheduler from a smart contract to delay a payment.
 contract RecurringPayment {
     SchedulerInterface public scheduler;
-    
+
     uint paymentInterval;
     uint paymentValue;
     uint lockedUntil;
 
-    address recipient;
+    address payable recipient;
     address public currentScheduledTransaction;
 
     event PaymentScheduled(address indexed scheduledTransaction, address recipient, uint value);
     event PaymentExecuted(address indexed scheduledTransaction, address recipient, uint value);
 
-    function RecurringPayment(
+    constructor(
         address _scheduler,
         uint _paymentInterval,
         uint _paymentValue,
-        address _recipient
+        address payable _recipient
     )  public payable {
         scheduler = SchedulerInterface(_scheduler);
         paymentInterval = _paymentInterval;
@@ -30,13 +30,11 @@ contract RecurringPayment {
         schedule();
     }
 
-    function ()
-        public payable 
-    {
+    function () external payable {
         if (msg.value > 0) { //this handles recieving remaining funds sent while scheduling (0.1 ether)
             return;
-        } 
-        
+        }
+
         process();
     }
 
@@ -50,20 +48,20 @@ contract RecurringPayment {
     {
         require(block.number >= lockedUntil);
         require(address(this).balance >= paymentValue);
-        
+
         recipient.transfer(paymentValue);
 
         emit PaymentExecuted(currentScheduledTransaction, recipient, paymentValue);
         return true;
     }
 
-    function schedule() 
+    function schedule()
         private returns (bool)
     {
         lockedUntil = block.number + paymentInterval;
 
         currentScheduledTransaction = scheduler.schedule.value(0.1 ether)( // 0.1 ether is to pay for gas, bounty and fee
-            this,                   // send to self
+            address(this),                   // send to self
             "",                     // and trigger fallback function
             [
                 1000000,            // The amount of gas to be sent with the transaction. Accounts for payout + new contract deployment

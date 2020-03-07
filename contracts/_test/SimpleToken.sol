@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 /// Super simple token contract that moves funds into the owner account on creation and
 /// only exposes an API to be used for `test/proxy.js`
@@ -8,7 +8,7 @@ contract SimpleToken {
 
     mapping(address => uint) balances;
 
-    function SimpleToken (uint _initialSupply) public {
+    constructor(uint _initialSupply) public {
         owner = msg.sender;
         balances[owner] = _initialSupply;
     }

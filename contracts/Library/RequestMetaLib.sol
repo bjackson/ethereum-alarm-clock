@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 /**
  * @title RequestMetaLib
@@ -7,12 +7,12 @@ pragma solidity 0.4.24;
 library RequestMetaLib {
 
     struct RequestMeta {
-        address owner;              /// The address that created this request.
+        address payable owner;              /// The address that created this request.
 
         address createdBy;          /// The address of the RequestFactory which created this request.
 
         bool isCancelled;           /// Was the TransactionRequest cancelled?
-        
+
         bool wasCalled;             /// Was the TransactionRequest called?
 
         bool wasSuccessful;         /// Was the return value from the TransactionRequest execution successful?

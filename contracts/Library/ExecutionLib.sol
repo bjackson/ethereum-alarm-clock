@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 /**
  * @title ExecutionLib
@@ -24,7 +24,9 @@ library ExecutionLib {
         /// Should never actually reach this require check, but here in case.
         require(self.gasPrice <= tx.gasprice);
         /* solium-disable security/no-call-value */
-        return self.toAddress.call.value(self.callValue).gas(self.callGas)(self.callData);
+        (bool success, ) = self.toAddress.call.value(self.callValue).gas(self.callGas)(self.callData);
+
+        return success;
     }
 
 
@@ -33,7 +35,7 @@ library ExecutionLib {
      * may consume.  The EXTRA_GAS value represents the overhead involved in
      * request execution.
      */
-    function CALL_GAS_CEILING(uint EXTRA_GAS) 
+    function CALL_GAS_CEILING(uint EXTRA_GAS)
         internal view returns (uint)
     {
         return block.gaslimit - EXTRA_GAS;
@@ -55,6 +57,6 @@ library ExecutionLib {
     function validateToAddress(address toAddress)
         internal pure returns (bool)
     {
-        return toAddress != 0x0;
+        return toAddress != address(0);
     }
 }

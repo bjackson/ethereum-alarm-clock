@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/Interface/SchedulerInterface.sol";
 
@@ -6,9 +6,9 @@ import "contracts/Interface/SchedulerInterface.sol";
 contract DelayedPayment {
 
     SchedulerInterface public scheduler;
-    
-    address recipient;
-    address owner;
+
+    address payable recipient;
+    address payable owner;
     address public payment;
 
     uint lockedUntil;
@@ -18,7 +18,7 @@ contract DelayedPayment {
     constructor(
         address _scheduler,
         uint    _numBlocks,
-        address _recipient,
+        address payable _recipient,
         uint _value
     )  public payable {
         scheduler = SchedulerInterface(_scheduler);
@@ -26,7 +26,7 @@ contract DelayedPayment {
         recipient = _recipient;
         owner = msg.sender;
         value = _value;
-   
+
         uint endowment = scheduler.computeEndowment(
             twentyGwei,
             twentyGwei,
@@ -36,7 +36,7 @@ contract DelayedPayment {
         );
 
         payment = scheduler.schedule.value(endowment)( // 0.1 ether is to pay for gas, bounty and fee
-            this,                   // send to self
+            address(this),                   // send to self
             "",                     // and trigger fallback function
             [
                 200000,             // The amount of gas to be sent with the transaction.
@@ -53,7 +53,7 @@ contract DelayedPayment {
         assert(address(this).balance >= value);
     }
 
-    function () public payable {
+    function () external payable {
         if (msg.value > 0) { //this handles recieving remaining funds sent while scheduling (0.1 ether)
             return;
         } else if (address(this).balance > 0) {
@@ -67,13 +67,13 @@ contract DelayedPayment {
         public returns (bool)
     {
         require(block.number >= lockedUntil);
-        
+
         recipient.transfer(value);
         return true;
     }
 
     function collectRemaining()
-        public returns (bool) 
+        public returns (bool)
     {
         owner.transfer(address(this).balance);
     }

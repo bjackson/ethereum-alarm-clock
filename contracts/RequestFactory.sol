@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/Interface/RequestFactoryInterface.sol";
 import "contracts/TransactionRequestCore.sol";
@@ -22,11 +22,11 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
     uint constant public TIMESTAMP_BUCKET_SIZE = 3600; //1h
 
     constructor(
-        address _transactionRequestCore
-    ) 
-        public 
+        address payable _transactionRequestCore
+    )
+        public
     {
-        require(_transactionRequestCore != 0x0);
+        require(_transactionRequestCore != address(0));
 
         transactionRequestCore = TransactionRequestCore(_transactionRequestCore);
     }
@@ -52,15 +52,15 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
      * @param _callData        -  The call data
      */
     function createRequest(
-        address[3]  _addressArgs,
-        uint[12]    _uintArgs,
-        bytes       _callData
+        address payable[3] memory _addressArgs,
+        uint[12] memory   _uintArgs,
+        bytes memory      _callData
     )
         whenNotPaused
         public payable returns (address)
     {
         // Create a new transaction request clone from transactionRequestCore.
-        address transactionRequest = createClone(transactionRequestCore);
+        address payable transactionRequest = createClone(address(transactionRequestCore));
 
         // Call initialize on the transaction request clone.
         TransactionRequestCore(transactionRequest).initialize.value(msg.value)(
@@ -95,9 +95,9 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
      *  Parameters are the same as `createRequest`
      */
     function createValidatedRequest(
-        address[3]  _addressArgs,
-        uint[12]    _uintArgs,
-        bytes       _callData
+        address payable[3] memory _addressArgs,
+        uint[12] memory   _uintArgs,
+        bytes memory      _callData
     )
         public payable returns (address)
     {
@@ -129,8 +129,8 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
 
             // Try to return the ether sent with the message
             msg.sender.transfer(msg.value);
-            
-            return 0x0;
+
+            return address(0);
         }
 
         return createRequest(_addressArgs, _uintArgs, _callData);
@@ -158,11 +158,11 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
      * @dev Validate the constructor arguments for either `createRequest` or `createValidatedRequest`.
      */
     function validateRequestParams(
-        address[3]  _addressArgs,
-        uint[12]    _uintArgs,
+        address payable[3] memory _addressArgs,
+        uint[12] memory   _uintArgs,
         uint        _endowment
     )
-        public view returns (bool[6])
+        public view returns (bool[6] memory)
     {
         return RequestLib.validate(
             [

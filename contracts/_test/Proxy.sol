@@ -1,21 +1,21 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/Interface/SchedulerInterface.sol";
 import "contracts/Interface/TransactionRequestInterface.sol";
 
 contract Proxy {
     SchedulerInterface public scheduler;
-    address public receipient; 
+    address payable public receipient;
     address public scheduledTransaction;
     address public owner;
 
-    function Proxy(address _scheduler, address _receipient, uint _payout, uint _gasPrice, uint _delay) public payable {
+    constructor(address _scheduler, address payable _receipient, uint _payout, uint _gasPrice, uint _delay) public payable {
         scheduler = SchedulerInterface(_scheduler);
         receipient = _receipient;
         owner = msg.sender;
 
         scheduledTransaction = scheduler.schedule.value(msg.value)(
-            this,              // toAddress
+            address(this),              // toAddress
             "",                     // callData
             [
                 2000000,            // The amount of gas to be sent with the transaction.
@@ -30,15 +30,15 @@ contract Proxy {
         );
     }
 
-    function () public payable {
+    function () external payable {
         if (msg.value > 0) {
             receipient.transfer(msg.value);
         }
     }
 
-    function sendOwnerEther(address _receipient) public {
-        if (msg.sender == owner && _receipient != 0x0) {
+    function sendOwnerEther(address payable _receipient) public payable {
+        if (msg.sender == owner && _receipient != address(0)) {
             TransactionRequestInterface(scheduledTransaction).sendOwnerEther(_receipient);
-        }   
+        }
     }
 }

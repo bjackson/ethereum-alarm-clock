@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/Library/RequestLib.sol";
 import "contracts/Library/RequestScheduleLib.sol";
@@ -31,9 +31,9 @@ contract TransactionRequestCore is TransactionRequestInterface {
      *  uintArgs[11] - claimData.requiredDeposit
      */
     function initialize(
-        address[4]  addressArgs,
-        uint[12]    uintArgs,
-        bytes       callData
+        address payable[4] memory addressArgs,
+        uint[12] memory   uintArgs,
+        bytes memory      callData
     )
         public payable
     {
@@ -47,7 +47,7 @@ contract TransactionRequestCore is TransactionRequestInterface {
      *  Allow receiving ether.  This is needed if there is a large increase in
      *  network gas prices.
      */
-    function() public payable {}
+    function() external payable {}
 
     /*
      *  Actions
@@ -71,13 +71,13 @@ contract TransactionRequestCore is TransactionRequestInterface {
     // Declaring this function `view`, although it creates a compiler warning, is
     // necessary to return values from it.
     function requestData()
-        public view returns (address[6], bool[3], uint[15], uint8[1])
+        public view returns (address[6] memory, bool[3] memory, uint[15] memory, uint8[1] memory)
     {
         return txnRequest.serialize();
     }
 
     function callData()
-        public view returns (bytes data)
+        public view returns (bytes memory data)
     {
         data = txnRequest.txnData.callData;
     }
@@ -91,13 +91,15 @@ contract TransactionRequestCore is TransactionRequestInterface {
      * it would become the owner of the tokens and this function would need
      * to be called with the encoded data to the token contract to transfer
      * the assets somewhere else. */
-    function proxy(address _to, bytes _data)
+    function proxy(address payable _to, bytes memory _data)
         public payable returns (bool success)
     {
         require(txnRequest.meta.owner == msg.sender && txnRequest.schedule.isAfterWindow());
-        
+
         /* solium-disable-next-line */
-        return _to.call.value(msg.value)(_data);
+        (success, ) = _to.call.value(msg.value)(_data);
+
+        return success;
     }
 
     /*
@@ -119,7 +121,7 @@ contract TransactionRequestCore is TransactionRequestInterface {
         return txnRequest.sendOwnerEther();
     }
 
-    function sendOwnerEther(address recipient) public returns (bool) {
+    function sendOwnerEther(address payable recipient) public payable returns (bool) {
         return txnRequest.sendOwnerEther(recipient);
     }
 

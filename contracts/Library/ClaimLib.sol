@@ -1,9 +1,9 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 library ClaimLib {
 
     struct ClaimData {
-        address claimedBy;          // The address that has claimed the txRequest.
+        address payable claimedBy;          // The address that has claimed the txRequest.
         uint claimDeposit;          // The deposit amount that was put down by the claimer.
         uint requiredDeposit;       // The required deposit to claim the txRequest.
         uint8 paymentModifier;      // An integer constrained between 0-100 that will be applied to the
@@ -16,9 +16,9 @@ library ClaimLib {
      * @param paymentModifier The payment modifier.
      */
     function claim(
-        ClaimData storage self, 
+        ClaimData storage self,
         uint8 _paymentModifier
-    ) 
+    )
         internal returns (bool)
     {
         self.claimedBy = msg.sender;
@@ -30,19 +30,18 @@ library ClaimLib {
     /*
      * Helper: returns whether this request is claimed.
      */
-    function isClaimed(ClaimData storage self) 
+    function isClaimed(ClaimData storage self)
         internal view returns (bool)
     {
-        return self.claimedBy != 0x0;
+        return self.claimedBy != address(0);
     }
-
 
     /*
      * @dev Refund the claim deposit to claimer.
      * @param self The Request.ClaimData
      * Called in RequestLib's `cancel()` and `refundClaimDeposit()`
      */
-    function refundDeposit(ClaimData storage self) 
+    function refundDeposit(ClaimData storage self)
         internal returns (bool)
     {
         // Check that the claim deposit is non-zero.

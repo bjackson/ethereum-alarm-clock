@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/zeppelin/SafeMath.sol";
 
@@ -42,7 +42,7 @@ library RequestScheduleLib {
      * @param self The ExecutionWindow object.
      * @return The unsigned integer representation of `now` in appropiate temporal units.
      */
-    function getNow(ExecutionWindow storage self) 
+    function getNow(ExecutionWindow storage self)
         public view returns (uint)
     {
         return _getNow(self.temporalUnit);
@@ -52,12 +52,12 @@ library RequestScheduleLib {
      * @dev Internal function to return the `now` based on the appropiate temporal units.
      * @param _temporalUnit The assigned TemporalUnit to this transaction.
      */
-    function _getNow(TemporalUnit _temporalUnit) 
+    function _getNow(TemporalUnit _temporalUnit)
         internal view returns (uint)
     {
         if (_temporalUnit == TemporalUnit.Timestamp) {
             return block.timestamp;
-        } 
+        }
         if (_temporalUnit == TemporalUnit.Blocks) {
             return block.number;
         }
@@ -69,13 +69,13 @@ library RequestScheduleLib {
      * @dev The modifier that will be applied to the bounty value depending
      * on when a call was claimed.
      */
-    function computePaymentModifier(ExecutionWindow storage self) 
+    function computePaymentModifier(ExecutionWindow storage self)
         internal view returns (uint8)
-    {        
+    {
         uint paymentModifier = (getNow(self).sub(firstClaimBlock(self)))
             .mul(100)
-            .div(self.claimWindowSize); 
-        assert(paymentModifier <= 100); 
+            .div(self.claimWindowSize);
+        assert(paymentModifier <= 100);
 
         return uint8(paymentModifier);
     }
@@ -102,7 +102,7 @@ library RequestScheduleLib {
     /*
      *  Helper: computes the time when the request will be frozen until execution.
      */
-    function freezeStart(ExecutionWindow storage self) 
+    function freezeStart(ExecutionWindow storage self)
         internal view returns (uint)
     {
         return self.windowStart.sub(self.freezePeriod);
@@ -111,7 +111,7 @@ library RequestScheduleLib {
     /*
      *  Helper: computes the time when the request will be frozen until execution.
      */
-    function firstClaimBlock(ExecutionWindow storage self) 
+    function firstClaimBlock(ExecutionWindow storage self)
         internal view returns (uint)
     {
         return freezeStart(self).sub(self.claimWindowSize);
@@ -129,7 +129,7 @@ library RequestScheduleLib {
     /*
      *  Helper: Returns boolean if we are after the execution window.
      */
-    function isAfterWindow(ExecutionWindow storage self) 
+    function isAfterWindow(ExecutionWindow storage self)
         internal view returns (bool)
     {
         return getNow(self) > windowEnd(self);
@@ -157,7 +157,7 @@ library RequestScheduleLib {
     /*
      * @dev Helper: Returns boolean if we are inside the claim window.
      */
-    function inClaimWindow(ExecutionWindow storage self) 
+    function inClaimWindow(ExecutionWindow storage self)
         internal view returns (bool)
     {
         /// Checks that the firstClaimBlock is in the past or now.
@@ -168,7 +168,7 @@ library RequestScheduleLib {
     /*
      *  Helper: Returns boolean if we are before the freeze period.
      */
-    function isBeforeFreeze(ExecutionWindow storage self) 
+    function isBeforeFreeze(ExecutionWindow storage self)
         internal view returns (bool)
     {
         return getNow(self) < freezeStart(self);
@@ -206,7 +206,7 @@ library RequestScheduleLib {
      * @param _windowStart The time in the future which represents the start of the execution window.
      * @return True if the windowStart is at least freezePeriod amount of time in the future.
      */
-    function validateWindowStart(TemporalUnit _temporalUnit, uint _freezePeriod, uint _windowStart) 
+    function validateWindowStart(TemporalUnit _temporalUnit, uint _freezePeriod, uint _windowStart)
         public view returns (bool)
     {
         return _getNow(_temporalUnit).add(_freezePeriod) <= _windowStart;
@@ -215,7 +215,7 @@ library RequestScheduleLib {
     /*
      *  Validation: ensure that the temporal unit passed in is constrained to 0 or 1
      */
-    function validateTemporalUnit(uint _temporalUnitAsUInt) 
+    function validateTemporalUnit(uint _temporalUnitAsUInt)
         public pure returns (bool)
     {
         return (_temporalUnitAsUInt != uint(TemporalUnit.Null) &&

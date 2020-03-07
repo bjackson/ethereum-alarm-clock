@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 /**
  * @title IterTools
@@ -10,7 +10,7 @@ library IterTools {
      * @param _values A boolean array of length 6.
      * @return True if all values are true, False if _any_ are false.
      */
-    function all(bool[6] _values) 
+    function all(bool[6] memory _values)
         public pure returns (bool)
     {
         for (uint i = 0; i < _values.length; i++) {

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.16;
 
 /*
 The MIT License (MIT)
@@ -29,9 +29,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 contract CloneFactory {
 
-  event CloneCreated(address indexed target, address clone);
+  event CloneCreated(address indexed target, address payable clone);
 
-  function createClone(address target) internal returns (address result) {
+  function createClone(address target) internal returns (address payable result) {
     bytes memory clone = hex"600034603b57603080600f833981f36000368180378080368173bebebebebebebebebebebebebebebebebebebebe5af43d82803e15602c573d90f35b3d90fd";
     bytes20 targetBytes = bytes20(target);
     for (uint i = 0; i < 20; i++) {

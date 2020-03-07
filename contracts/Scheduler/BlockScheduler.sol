@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.16;
 
 import "contracts/Library/RequestScheduleLib.sol";
 import "contracts/Scheduler/BaseScheduler.sol";
@@ -13,8 +13,8 @@ contract BlockScheduler is BaseScheduler {
      * @dev Constructor
      * @param _factoryAddress Address of the RequestFactory which creates requests for this scheduler.
      */
-    constructor(address _factoryAddress, address _feeRecipient) public {
-        require(_factoryAddress != 0x0);
+    constructor(address _factoryAddress, address payable _feeRecipient) public {
+        require(_factoryAddress != address(0));
 
         // Default temporal unit is block number.
         temporalUnit = RequestScheduleLib.TemporalUnit.Blocks;
