@@ -5,6 +5,11 @@ const HDWalletProvider = require("truffle-hdwallet-provider");
 const mnemonic = "";
 
 module.exports = {
+  compilers: {
+    solc: {
+      version: '0.6.3',
+    },
+  },
   networks: {
     development: {
       gas: 4700000,

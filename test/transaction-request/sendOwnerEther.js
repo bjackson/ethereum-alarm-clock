@@ -1,3 +1,4 @@
+
 require("chai")
   .use(require("chai-as-promised"))
   .should()
@@ -34,15 +35,15 @@ contract("TransactionRequestCore", async (accounts) => {
     )
 
     const initialWalletBalance = await getBalance(wallet)
-    const funds = 10 ** 18 // 1 ETH
+    const funds = 1e18 // 1 ETH
     const delay = 50
-    const payout = 10 ** 17 // 0.1 ETH
-    const gasPrice = 10 ** 6
+    const payout = 1e17 // 0.1 ETH
+    const gasPrice = 1e6
 
     proxy = await Proxy.new(
       blockScheduler.address,
       wallet,
-      payout,
+      payout.toString(),
       gasPrice,
       delay,
       { value: funds }
@@ -57,7 +58,8 @@ contract("TransactionRequestCore", async (accounts) => {
     scheduledTransactionAddress = await proxy.scheduledTransaction()
     const scheduledTransaction = TransactionRequestInterface.at(scheduledTransactionAddress)
 
-    await scheduledTransaction.execute({ from: accounts[2], gas: 3000000, gasPrice })
+    console.log(scheduledTransaction);
+    await scheduledTransaction.send({ from: accounts[2], gas: 3000000, gasPrice })
 
     walletBalanceAfterExecution = await getBalance(wallet)
     expect(walletBalanceAfterExecution).to.equals(initialWalletBalance + payout)

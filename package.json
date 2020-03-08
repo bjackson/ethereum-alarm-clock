@@ -8,13 +8,14 @@
         "test": "tests"
     },
     "scripts": {
-        "test": "truffle test",
+        "test": "rm -rf build/ && truffle test",
         "coverage": "./node_modules/.bin/solidity-coverage",
         "lint": "./node_modules/eslint/bin/eslint.js .",
         "lint-fix": "./node_modules/eslint/bin/eslint.js . --fix",
         "solium": "./node_modules/solium/bin/solium.js -d contracts --fix",
         "clean": "truffle networks --clean",
-        "migrate-reset": "truffle migrate --reset"
+        "migrate-reset": "truffle migrate --reset",
+        "truffle-version": "truffle version"
     },
     "repository": {
         "type": "git",
@@ -41,7 +42,7 @@
         "web3": "^1.2.6"
     },
     "devDependencies": {
-        "@digix/tempo": "^0.2.0",
+        "@digix/tempo": "github:apper-tech/tempo",
         "bignumber.js": "^9.0.0",
         "bn.js": "^5.1.1",
         "chai": "^4.2.0",

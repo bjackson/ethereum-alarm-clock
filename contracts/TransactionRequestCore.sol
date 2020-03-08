@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity 0.6.3;
 
 import "contracts/Library/RequestLib.sol";
 import "contracts/Library/RequestScheduleLib.sol";
@@ -47,20 +47,21 @@ contract TransactionRequestCore is TransactionRequestInterface {
      *  Allow receiving ether.  This is needed if there is a large increase in
      *  network gas prices.
      */
-    function() external payable {}
+    fallback() external payable {}
+    receive() external payable {}
 
     /*
      *  Actions
      */
-    function execute() public returns (bool) {
+    function execute() public override returns (bool) {
         return txnRequest.execute();
     }
 
-    function cancel() public returns (bool) {
+    function cancel() public override returns (bool) {
         return txnRequest.cancel();
     }
 
-    function claim() public payable returns (bool) {
+    function claim() public override payable returns (bool) {
         return txnRequest.claim();
     }
 
@@ -71,13 +72,13 @@ contract TransactionRequestCore is TransactionRequestInterface {
     // Declaring this function `view`, although it creates a compiler warning, is
     // necessary to return values from it.
     function requestData()
-        public view returns (address[6] memory, bool[3] memory, uint[15] memory, uint8[1] memory)
+        public override view returns (address[6] memory, bool[3] memory, uint[15] memory, uint8[1] memory)
     {
         return txnRequest.serialize();
     }
 
     function callData()
-        public view returns (bytes memory data)
+        public override view returns (bytes memory data)
     {
         data = txnRequest.txnData.callData;
     }
@@ -92,7 +93,7 @@ contract TransactionRequestCore is TransactionRequestInterface {
      * to be called with the encoded data to the token contract to transfer
      * the assets somewhere else. */
     function proxy(address payable _to, bytes memory _data)
-        public payable returns (bool success)
+        public override payable returns (bool success)
     {
         require(txnRequest.meta.owner == msg.sender && txnRequest.schedule.isAfterWindow());
 
@@ -105,23 +106,23 @@ contract TransactionRequestCore is TransactionRequestInterface {
     /*
      *  Pull based payment functions.
      */
-    function refundClaimDeposit() public returns (bool) {
+    function refundClaimDeposit() public override returns (bool) {
         txnRequest.refundClaimDeposit();
     }
 
-    function sendFee() public returns (bool) {
+    function sendFee() public override returns (bool) {
         return txnRequest.sendFee();
     }
 
-    function sendBounty() public returns (bool) {
+    function sendBounty() public override returns (bool) {
         return txnRequest.sendBounty();
     }
 
-    function sendOwnerEther() public returns (bool) {
+    function sendOwnerEther() public override returns (bool) {
         return txnRequest.sendOwnerEther();
     }
 
-    function sendOwnerEther(address payable recipient) public payable returns (bool) {
+    function sendOwnerEther(address payable recipient) public override payable returns (bool) {
         return txnRequest.sendOwnerEther(recipient);
     }
 

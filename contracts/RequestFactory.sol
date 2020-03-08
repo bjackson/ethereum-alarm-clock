@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity 0.6.3;
 
 import "contracts/Interface/RequestFactoryInterface.sol";
 import "contracts/TransactionRequestCore.sol";
@@ -57,7 +57,7 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
         bytes memory      _callData
     )
         whenNotPaused
-        public payable returns (address)
+        public override payable returns (address)
     {
         // Create a new transaction request clone from transactionRequestCore.
         address payable transactionRequest = createClone(address(transactionRequestCore));
@@ -99,7 +99,7 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
         uint[12] memory   _uintArgs,
         bytes memory      _callData
     )
-        public payable returns (address)
+        public override payable returns (address)
     {
         bool[6] memory isValid = validateRequestParams(
             _addressArgs,
@@ -162,7 +162,7 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
         uint[12] memory   _uintArgs,
         uint        _endowment
     )
-        public view returns (bool[6] memory)
+        public override view returns (bool[6] memory)
     {
         return RequestLib.validate(
             [
@@ -180,7 +180,7 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
     mapping (address => bool) requests;
 
     function isKnownRequest(address _address)
-        public view returns (bool isKnown)
+        public override view returns (bool isKnown)
     {
         return requests[_address];
     }

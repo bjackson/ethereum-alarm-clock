@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity 0.6.3;
 
 contract TransactionRecorder {
     address payable owner;
@@ -13,7 +13,15 @@ contract TransactionRecorder {
         owner = msg.sender;
     }
 
-    function() external payable {
+    fallback() external payable {
+        lastCallGas = gasleft();
+        lastCallData = msg.data;
+        lastCaller = msg.sender;
+        lastCallValue = msg.value;
+        wasCalled = true;
+    }
+
+    receive() external payable {
         lastCallGas = gasleft();
         lastCallData = msg.data;
         lastCaller = msg.sender;

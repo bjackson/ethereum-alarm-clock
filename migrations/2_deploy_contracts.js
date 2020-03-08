@@ -164,6 +164,7 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS...\n`)
       }
     })
     .then(() => RequestFactory.at(RequestFactory.address))
-    .then(requestFactory => requestFactory.owner())
-    .then(owner => console.log(owner))
+    // .then(console.log)
+    .then(requestFactory => requestFactory.owner)
+    .then(console.log)
 }

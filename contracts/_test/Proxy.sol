@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity 0.6.3;
 
 import "contracts/Interface/SchedulerInterface.sol";
 import "contracts/Interface/TransactionRequestInterface.sol";
@@ -30,7 +30,13 @@ contract Proxy {
         );
     }
 
-    function () external payable {
+    fallback() external payable {
+        if (msg.value > 0) {
+            receipient.transfer(msg.value);
+        }
+    }
+
+    receive() external payable {
         if (msg.value > 0) {
             receipient.transfer(msg.value);
         }

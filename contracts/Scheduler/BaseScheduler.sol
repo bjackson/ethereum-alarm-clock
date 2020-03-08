@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity 0.6.3;
 
 import "contracts/Interface/RequestFactoryInterface.sol";
 import "contracts/Interface/SchedulerInterface.sol";
@@ -25,7 +25,8 @@ contract BaseScheduler is SchedulerInterface {
      * @dev Fallback function to be able to receive ether. This can occur
      *  legitimately when scheduling fails due to a validation error.
      */
-    function() external payable {}
+    fallback() external payable {}
+    receive() external payable {}
 
     /// Event that bubbles up the address of new requests made with this scheduler.
     event NewRequest(address request);
@@ -42,14 +43,14 @@ contract BaseScheduler is SchedulerInterface {
      * @param _uintArgs [5] The fee attached to this transaction.
      * @param _uintArgs [6] The bounty attached to this transaction.
      * @param _uintArgs [7] The deposit required to claim this transaction.
-     * @return The address of the new TransactionRequest.
+     * @return newRequest The address of the new TransactionRequest.
      */
     function schedule (
         address payable         _toAddress,
         bytes memory    _callData,
         uint[8] memory  _uintArgs
     )
-        public payable returns (address newRequest)
+        public override payable returns (address newRequest)
     {
         RequestFactoryInterface factory = RequestFactoryInterface(factoryAddress);
 
@@ -126,7 +127,7 @@ contract BaseScheduler is SchedulerInterface {
         uint _callValue,
         uint _gasPrice
     )
-        public view returns (uint)
+        public override view returns (uint)
     {
         return PaymentLib.computeEndowment(
             _bounty,

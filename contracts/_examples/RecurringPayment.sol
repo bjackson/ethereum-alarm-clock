@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity 0.6.3;
 
 import "contracts/Interface/SchedulerInterface.sol";
 
@@ -30,7 +30,15 @@ contract RecurringPayment {
         schedule();
     }
 
-    function () external payable {
+    fallback() external payable {
+        if (msg.value > 0) { //this handles recieving remaining funds sent while scheduling (0.1 ether)
+            return;
+        }
+
+        process();
+    }
+
+    receive() external payable {
         if (msg.value > 0) { //this handles recieving remaining funds sent while scheduling (0.1 ether)
             return;
         }

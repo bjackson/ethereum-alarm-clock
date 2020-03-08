@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity 0.6.3;
 
 /// Super simple token contract that moves funds into the owner account on creation and
 /// only exposes an API to be used for `test/proxy.js`

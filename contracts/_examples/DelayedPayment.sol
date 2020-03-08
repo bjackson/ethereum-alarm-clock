@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity 0.6.3;
 
 import "contracts/Interface/SchedulerInterface.sol";
 
@@ -53,7 +53,17 @@ contract DelayedPayment {
         assert(address(this).balance >= value);
     }
 
-    function () external payable {
+    fallback() external payable {
+        if (msg.value > 0) { //this handles recieving remaining funds sent while scheduling (0.1 ether)
+            return;
+        } else if (address(this).balance > 0) {
+            payout();
+        } else {
+            revert();
+        }
+    }
+
+    receive() external payable {
         if (msg.value > 0) { //this handles recieving remaining funds sent while scheduling (0.1 ether)
             return;
         } else if (address(this).balance > 0) {
