@@ -58,7 +58,7 @@ contract("Timestamp reserved window", async (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "just-some-call-data"
+      web3.utils.fromAscii("just-some-call-data")
     )
     expect(txRequest.address).to.exist
 

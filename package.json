@@ -8,7 +8,7 @@
         "test": "tests"
     },
     "scripts": {
-        "test": "rm -rf build/ && truffle test",
+        "test": "rm -rf build/ && truffle test --debug",
         "coverage": "./node_modules/.bin/solidity-coverage",
         "lint": "./node_modules/eslint/bin/eslint.js .",
         "lint-fix": "./node_modules/eslint/bin/eslint.js . --fix",

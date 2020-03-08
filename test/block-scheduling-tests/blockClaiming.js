@@ -57,7 +57,7 @@ contract("Block claiming", async (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "this-is-the-call-data",
+      web3.utils.fromAscii("this-is-the-call-data"),
       { value: config.web3.utils.toWei("1") }
     )
   })

@@ -50,7 +50,7 @@ contract("TransactionRequestCore proxy function", (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "some-call-data-could-be-anything",
+      web3.utils.fromAscii("some-call-data-could-be-anything"),
       { value: config.web3.utils.toWei("500", "finney") }
     )
 
@@ -80,7 +80,7 @@ contract("TransactionRequestCore proxy function", (accounts) => {
 
     // This is allowed since it is from scheduling accounts
     const tx = await txRequest.proxy(accounts[7], testData32)
-    expect(tx.receipt.status).to.be.oneOf(['0x1', '0x01', 1])
+    expect(tx.receipt.status).to.be.equal(true);
   })
 
   it("does some fancy stuff with proxy", async () => {
@@ -111,6 +111,7 @@ contract("TransactionRequestCore proxy function", (accounts) => {
         3000000, // callGas
         12345, // callValue
         gasPrice,
+        0
       ],
       buyTokensSig,
       { value: config.web3.utils.toWei("500", "finney") }

@@ -63,7 +63,7 @@ contract("Test already executed", async (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "some-call-data-goes-here",
+      web3.utils.fromAscii("some-call-data-goes-here"),
       { value: config.web3.utils.toWei("1") }
     )
 

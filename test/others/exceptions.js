@@ -56,7 +56,7 @@ contract("Exceptions", async (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "some-call-data-could-be-anything",
+      web3.utils.fromAscii("some-call-data-could-be-anything"),
       { value: config.web3.utils.toWei("100", "finney") }
     )
   })

@@ -7,6 +7,7 @@ const { expect } = require("chai")
 const { waitUntilBlock } = require("@digix/tempo")(web3)
 
 const config = require("../../config")
+const { toBN } = config.web3.utils;
 
 const BlockScheduler = artifacts.require("./BlockScheduler.sol")
 const RequestFactory = artifacts.require("./RequestFactory.sol")
@@ -37,7 +38,7 @@ contract("Delayed payment", (accounts) => {
     )
 
     const numberOfBlocks = 50
-    const paymentValue = 10 ** 17 // 0.1 ETH
+    const paymentValue = toBN(10).pow(17) // 0.1 ETH
     const recipient = accounts[1]
     const miner = accounts[2]
 

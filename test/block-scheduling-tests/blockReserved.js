@@ -49,7 +49,7 @@ contract("Block reserved window", (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "this-is-the-call-data"
+      web3.utils.fromAscii("this-is-the-call-data"),
     )
 
     const requestData = await RequestData.from(txRequest)

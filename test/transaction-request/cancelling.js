@@ -57,7 +57,7 @@ contract("Cancelling", async (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "some-call-data-could-be-anything",
+      web3.utils.fromAscii("some-call-data-could-be-anything"),
       { value: config.web3.utils.toWei("1") }
     )
   })
@@ -115,7 +115,7 @@ contract("Cancelling", async (accounts) => {
 
     // For completion sakes, let's test if the `Owner` can cancel.
     const cancelTx = await txRequest.cancel({
-      Owner,
+      from: Owner,
     })
     expect(cancelTx.receipt).to.exist
 

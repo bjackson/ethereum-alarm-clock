@@ -13,6 +13,8 @@ const TransactionRequestCore = artifacts.require("./TransactionRequestCore.sol")
 const ethUtil = require("ethereumjs-util")
 const config = require("../../config")
 const { parseRequestData, calculateBlockBucket } = require("../dataHelpers.js")
+const toBN = web3.utils.toBN;
+
 
 const NULL_ADDR = "0x0000000000000000000000000000000000000000"
 
@@ -36,7 +38,7 @@ contract("Request factory", async (accounts) => {
     gasPrice: 1000000,
     requiredDeposit: 1000000,
     testCallData: "this-is-call-data",
-    endowment: 10 ** 18
+    endowment: toBN(10).pow(18)
   }
 
   const getWindowStart = async () => (await config.web3.eth.getBlockNumber()) + 20
@@ -60,6 +62,8 @@ contract("Request factory", async (accounts) => {
       request.windowStart,
       request.callGas,
       request.callValue,
+      request.gasPrice,
+      request.requiredDeposit,
     ]
   }
 

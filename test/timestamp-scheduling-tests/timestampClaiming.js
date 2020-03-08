@@ -61,7 +61,7 @@ contract("Timestamp claiming", async (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "just-some-call-data",
+      web3.utils.fromAscii("just-some-call-data"),
       { value: config.web3.utils.toWei("1") }
     )
   })

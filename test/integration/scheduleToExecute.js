@@ -89,9 +89,9 @@ contract("Schedule to execution flow", (accounts) => {
 
     expect(requestData.schedule.windowSize).to.equal(365)
 
-    expect(requestData.txData.callGas).to.equal(1212121)
+    expect(requestData.txData.callGas).to.equal('1212121')
 
-    expect(requestData.txData.callValue).to.equal(123454321)
+    expect(requestData.txData.callValue).to.equal('123454321')
 
     expect(requestData.schedule.windowStart).to.equal(windowStart)
 

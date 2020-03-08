@@ -63,7 +63,7 @@ contract("Tests execution gas requirements", async (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "here-I-am!!-the-call-data",
+      web3.utils.fromAscii("here-I-am!!-the-call-data"),
       { value: config.web3.utils.toWei("1", "ether") }
     )
     expect(txRequest.address).to.exist

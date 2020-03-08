@@ -90,7 +90,7 @@ contract("Timestamp scheduling", (accounts) => {
 
     // Sanity check
     const expectedEndowment = computeEndowment(bounty, fee, 1212121, 123454321, gasPrice)
-    expect(requestData.calcEndowment()).to.equal(expectedEndowment)
+    expect(requestData.calcEndowment().toString()).to.equal(expectedEndowment.toString())
 
     expect(requestData.txData.toAddress).to.equal(transactionRecorder.address)
 
@@ -133,6 +133,6 @@ contract("Timestamp scheduling", (accounts) => {
         ],
         { from: accounts[0] }
       )
-      .should.be.rejectedWith("VM Exception while processing transaction: revert")
+      .should.be.rejected;
   })
 })

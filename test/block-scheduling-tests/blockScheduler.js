@@ -117,7 +117,7 @@ contract("Block scheduling", (accounts) => {
 
     // Test that the endowment was sent to the txRequest
     const balOfTxRequest = await config.web3.eth.getBalance(txRequest.address)
-    expect(parseInt(balOfTxRequest, 10)).to.equal(requestData.calcEndowment())
+    expect(parseInt(balOfTxRequest, 10).toString()).to.equal(requestData.calcEndowment().toString())
 
     // Sanity check
     const expectedEndowment = computeEndowment(bounty, fee, 1212121, 123454321, gasPrice)
@@ -153,7 +153,7 @@ contract("Block scheduling", (accounts) => {
     await blockScheduler
       .schedule(
         transactionRecorder.address,
-        "this-is-the-call-data",
+        web3.utils.fromAscii("this-is-the-call-data"),
         [
           4e20, // callGas is set way too high
           123454321, // callValue
@@ -166,6 +166,6 @@ contract("Block scheduling", (accounts) => {
         ],
         { from: User2, value: config.web3.utils.toWei("10") }
       )
-      .should.be.rejectedWith("VM Exception while processing transaction: revert")
+      .should.be.rejected;
   })
 })

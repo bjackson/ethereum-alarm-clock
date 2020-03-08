@@ -1,4 +1,4 @@
-const BigNumber = require('bignumber.js')
+const BigNumber = web3.utils.BN;
 
 const wasAborted = (executeTx) => {
   const Aborted = executeTx.logs.find(e => e.event === "Aborted")
@@ -49,7 +49,7 @@ const parseRequestData = async (transactionRequest) => {
   return {
     claimData: {
       claimedBy: data[0][0],
-      claimDeposit: data[2][0].toNumber(),
+      claimDeposit: data[2][0].toString(),
       paymentModifier: data[3][0].toNumber(),
       requiredDeposit: data[2][14].toNumber(),
     },
@@ -116,7 +116,7 @@ class RequestData {
       bountyBenefactor: data[0][4],
       fee: data[2][1].toNumber(),
       feeOwed: data[2][2].toNumber(),
-      bounty: data[2][3].toNumber(),
+      bounty: data[2][3],
       bountyOwed: data[2][4].toNumber(),
     }
 
@@ -130,9 +130,9 @@ class RequestData {
     }
 
     this.txData = {
-      callGas: data[2][11].toNumber(),
-      callValue: data[2][12].toNumber(),
-      gasPrice: data[2][13].toNumber(),
+      callGas: data[2][11].toString(),
+      callValue: data[2][12].toString(),
+      gasPrice: data[2][13].toString(),
       toAddress: data[0][5],
     }
   }
@@ -149,8 +149,8 @@ class RequestData {
     const data = await this.txRequest.requestData()
     this.claimData = {
       claimedBy: data[0][0],
-      claimDeposit: data[2][0].toNumber(),
-      paymentModifier: data[3][0].toNumber(),
+      claimDeposit: data[2][0].toString(),
+      paymentModifier: data[3][0].toString(),
     }
 
     this.meta = {
@@ -166,7 +166,7 @@ class RequestData {
       bountyBenefactor: data[0][4],
       fee: data[2][1].toNumber(),
       feeOwed: data[2][2].toNumber(),
-      bounty: data[2][3].toNumber(),
+      bounty: data[2][3],
       bountyOwed: data[2][4].toNumber(),
     }
 

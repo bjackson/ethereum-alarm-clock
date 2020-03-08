@@ -14,7 +14,7 @@ const { waitUntilBlock } = require("@digix/tempo")(web3)
 const config = require("../../config")
 const { RequestData } = require("../dataHelpers.js")
 
-const { toBN } = config.web3.utils
+const { toBN } = config.web3.utils;
 
 const MINUTE = 60 // seconds
 const HOUR = 60 * MINUTE
@@ -79,7 +79,7 @@ contract("Test accounting", async (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "some-call-data-goes-here",
+      web3.utils.fromAscii("some-call-data-goes-here"),
       { value: config.web3.utils.toWei("1") }
     )
     expect(txRequest.address).to.exist
@@ -88,7 +88,7 @@ contract("Test accounting", async (accounts) => {
 
     expect(requestData.paymentData.fee).to.equal(fee)
 
-    expect(requestData.paymentData.bounty).to.equal(bounty)
+    expect(requestData.paymentData.bounty.toString()).to.equal(bounty.toString())
 
     const beforeFeeBal = await config.web3.eth.getBalance(requestData.paymentData.feeRecipient)
     const beforeBountyBal = await config.web3.eth.getBalance(accounts[1])
@@ -110,21 +110,21 @@ contract("Test accounting", async (accounts) => {
     const afterBountyBal = await config.web3.eth.getBalance(accounts[1])
 
     const Executed = executeTx.logs.find(e => e.event === "Executed")
-    const feeAmt = Executed.args.fee.toNumber()
-    const bountyAmt = Executed.args.bounty.toNumber()
+    const feeAmt = Executed.args.fee;
+    const bountyAmt = Executed.args.bounty;
 
-    expect(feeAmt).to.equal(fee)
+    expect(feeAmt.toString()).to.equal(fee.toString());
 
     expect(toBN(afterFeeBal)
       .sub(toBN(beforeFeeBal))
-      .toNumber()).to.equal(feeAmt)
+      .toString()).to.equal(feeAmt.toString())
 
     const { gasUsed } = executeTx.receipt
     const gasCost = gasUsed * gasPrice
 
     const expectedBounty = gasCost + requestData.paymentData.bounty
 
-    expect(bountyAmt).to.be.above(expectedBounty)
+    expect(bountyAmt.gt(expectedBounty)).to.be.true;
 
     expect(bountyAmt - expectedBounty).to.be.below(120000 * gasPrice)
 
@@ -161,8 +161,9 @@ contract("Test accounting", async (accounts) => {
         2000000, // callGas
         0, // callValue
         gasPrice,
+        1,
       ],
-      "some-call-data-goes-here",
+      web3.utils.fromAscii("some-call-data-goes-here"),
       { value: config.web3.utils.toWei("1") }
     )
     expect(txRequest.address).to.exist
@@ -276,8 +277,9 @@ contract("Test accounting", async (accounts) => {
         2000000, // callGas
         0, // callValue
         gasPrice,
+        1
       ],
-      "some-call-data-goes-here",
+      web3.utils.fromAscii("some-call-data-goes-here"),
       { value: config.web3.utils.toWei("1") }
     )
     expect(txRequest.address).to.exist
@@ -340,8 +342,9 @@ contract("Test accounting", async (accounts) => {
         2000000, // callGas
         0, // callValue
         gasPrice,
+        0,
       ],
-      "some-call-data-goes-here",
+      web3.utils.fromAscii("some-call-data-goes-here"),
       { value: config.web3.utils.toWei("1") }
     )
     expect(txRequest.address).to.exist
@@ -412,7 +415,7 @@ contract("Test accounting", async (accounts) => {
         gasPrice,
         requiredDeposit,
       ],
-      "some-call-data-goes-here",
+      web3.utils.fromAscii("some-call-data-goes-here"),
       { value: config.web3.utils.toWei("1") }
     )
     expect(txRequest.address).to.exist
@@ -421,7 +424,7 @@ contract("Test accounting", async (accounts) => {
 
     expect(requestData.paymentData.fee).to.equal(fee)
 
-    expect(requestData.paymentData.bounty).to.equal(bounty)
+    expect(requestData.paymentData.bounty.toString()).to.equal(bounty.toString())
 
     const beforeFeeBal = await config.web3.eth.getBalance(requestData.paymentData.feeRecipient)
     const beforeBountyBal = await config.web3.eth.getBalance(accounts[1])
@@ -445,14 +448,14 @@ contract("Test accounting", async (accounts) => {
     const afterBountyBal = await config.web3.eth.getBalance(accounts[1])
 
     const Executed = executeTx.logs.find(e => e.event === "Executed")
-    const feeAmt = Executed.args.fee.toNumber()
-    const bountyAmt = Executed.args.bounty.toNumber()
+    const feeAmt = Executed.args.fee
+    const bountyAmt = Executed.args.bounty
 
-    expect(feeAmt).to.equal(fee)
+    expect(feeAmt.toString()).to.equal(fee.toString())
 
     expect(toBN(afterFeeBal)
       .sub(toBN(beforeFeeBal))
-      .toNumber()).to.equal(feeAmt)
+      .toString()).to.equal(feeAmt.toString())
 
     const { gasUsed } = executeTx.receipt
     const gasCost = parseInt(gasUsed, 10) * moreThanRequired
@@ -460,12 +463,12 @@ contract("Test accounting", async (accounts) => {
 
     const expectedBounty = gasReimbursement + requestData.paymentData.bounty
 
-    expect(bountyAmt).to.be.above(expectedBounty)
+    expect(bountyAmt.gt(expectedBounty)).to.be.true;
 
     expect(bountyAmt - expectedBounty).to.be.below(120000 * gasPrice)
 
     expect(toBN(afterBountyBal).sub(toBN(beforeBountyBal)).toNumber())
-      .to.equal(bountyAmt - gasCost - 1)
+      .to.equal(toBN(bountyAmt) - toBN(gasCost) - toBN(1))
   })
 
   it("tests claim deposit returned even if returning it throws", async () => {
