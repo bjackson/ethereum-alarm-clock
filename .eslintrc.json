@@ -1,0 +1,18 @@
+{
+    "extends": "airbnb-base",
+    "env": {
+        "node": true,
+        "mocha": true
+    },
+    "globals": {
+        "artifacts": "readonly",
+        "web3": "readonly",
+        "contract": "readonly"
+    },
+    "rules": {
+        "semi": "off",
+        "quotes": "off",
+        "no-unused-expressions": "off",
+        "comma-dangle": "off"
+    }
+}
