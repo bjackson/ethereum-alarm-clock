@@ -117,7 +117,7 @@ contract("Block scheduling", (accounts) => {
 
     // Test that the endowment was sent to the txRequest
     const balOfTxRequest = await config.web3.eth.getBalance(txRequest.address)
-    expect(parseInt(balOfTxRequest, 10).toString()).to.equal(requestData.calcEndowment().toString())
+    expect(balOfTxRequest.toString()).to.equal(requestData.calcEndowment().toString())
 
     // Sanity check
     const expectedEndowment = computeEndowment(bounty, fee, 1212121, 123454321, gasPrice)

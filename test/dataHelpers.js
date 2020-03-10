@@ -1,4 +1,4 @@
-const BigNumber = web3.utils.BN;
+const { toBN } = web3.utils;
 
 const wasAborted = (executeTx) => {
   const Aborted = executeTx.logs.find(e => e.event === "Aborted")
@@ -19,7 +19,7 @@ const parseAbortData = (executeTx) => {
   const abortedLogs = executeTx.logs.filter(e => e.event === "Aborted")
   const abortedNums = []
   abortedLogs.forEach((log) => {
-    abortedNums.push(log.args.reason.toNumber())
+    abortedNums.push(log.args.reason)
   })
   const reasons = abortedNums.map(num => reason[num])
 
@@ -27,21 +27,21 @@ const parseAbortData = (executeTx) => {
 }
 
 const calculateTimestampBucket = (start) => {
-  const s = new BigNumber(start)
-  const mod = s.mod(3600)
+  const s = toBN(start)
+  const mod = s.umod(3600)
 
-  return s.minus(mod)
+  return s.sub(mod)
 }
 
 const calculateBlockBucket = (start) => {
-  const s = new BigNumber(start)
-  const mod = s.mod(240)
+  const s = toBN(start)
+  const mod = s.umod(240)
 
-  return s.minus(mod).times(-1)
+  return s.sub(mod).mul(-1)
 }
 
 const computeEndowment = (bounty, fee, callGas, callValue, gasPrice) => (
-  bounty + (fee * 2) + (callGas * gasPrice) + (180000 * gasPrice) + callValue
+  bounty + (fee * 2) + (callGas * gasPrice) + (toBN(180000) * gasPrice) + callValue
 )
 
 const parseRequestData = async (transactionRequest) => {
@@ -50,8 +50,8 @@ const parseRequestData = async (transactionRequest) => {
     claimData: {
       claimedBy: data[0][0],
       claimDeposit: data[2][0].toString(),
-      paymentModifier: data[3][0].toNumber(),
-      requiredDeposit: data[2][14].toNumber(),
+      paymentModifier: data[3][0],
+      requiredDeposit: data[2][14],
     },
 
     meta: {
@@ -65,25 +65,25 @@ const parseRequestData = async (transactionRequest) => {
     paymentData: {
       feeRecipient: data[0][3],
       bountyBenefactor: data[0][4],
-      fee: data[2][1].toNumber(),
-      feeOwed: data[2][2].toNumber(),
-      bounty: data[2][3].toNumber(),
-      bountyOwed: data[2][4].toNumber(),
+      fee: data[2][1],
+      feeOwed: data[2][2],
+      bounty: data[2][3],
+      bountyOwed: data[2][4],
     },
 
     schedule: {
-      claimWindowSize: data[2][5].toNumber(),
-      freezePeriod: data[2][6].toNumber(),
-      reservedWindowSize: data[2][7].toNumber(),
-      temporalUnit: data[2][8].toNumber(),
-      windowSize: data[2][9].toNumber(),
-      windowStart: data[2][10].toNumber(),
+      claimWindowSize: data[2][5],
+      freezePeriod: data[2][6],
+      reservedWindowSize: data[2][7],
+      temporalUnit: data[2][8],
+      windowSize: data[2][9],
+      windowStart: data[2][10],
     },
 
     txData: {
-      callGas: data[2][11].toNumber(),
-      callValue: data[2][12].toNumber(),
-      gasPrice: data[2][13].toNumber(),
+      callGas: data[2][11],
+      callValue: data[2][12],
+      gasPrice: data[2][13],
       toAddress: data[0][5],
     },
   }
@@ -98,9 +98,9 @@ class RequestData {
     this.txRequest = txRequest
     this.claimData = {
       claimedBy: data[0][0],
-      claimDeposit: data[2][0].toNumber(),
-      paymentModifier: data[3][0].toNumber(),
-      requiredDeposit: data[2][14].toNumber(),
+      claimDeposit: data[2][0],
+      paymentModifier: data[3][0],
+      requiredDeposit: data[2][14],
     }
 
     this.meta = {
@@ -114,25 +114,25 @@ class RequestData {
     this.paymentData = {
       feeRecipient: data[0][3],
       bountyBenefactor: data[0][4],
-      fee: data[2][1].toNumber(),
-      feeOwed: data[2][2].toNumber(),
+      fee: data[2][1],
+      feeOwed: data[2][2],
       bounty: data[2][3],
-      bountyOwed: data[2][4].toNumber(),
+      bountyOwed: data[2][4],
     }
 
     this.schedule = {
-      claimWindowSize: data[2][5].toNumber(),
-      freezePeriod: data[2][6].toNumber(),
-      reservedWindowSize: data[2][7].toNumber(),
-      temporalUnit: data[2][8].toNumber(),
-      windowSize: data[2][9].toNumber(),
-      windowStart: data[2][10].toNumber(),
+      claimWindowSize: data[2][5],
+      freezePeriod: data[2][6],
+      reservedWindowSize: data[2][7],
+      temporalUnit: data[2][8],
+      windowSize: data[2][9],
+      windowStart: data[2][10],
     }
 
     this.txData = {
-      callGas: data[2][11].toString(),
-      callValue: data[2][12].toString(),
-      gasPrice: data[2][13].toString(),
+      callGas: data[2][11],
+      callValue: data[2][12],
+      gasPrice: data[2][13],
       toAddress: data[0][5],
     }
   }
@@ -149,8 +149,8 @@ class RequestData {
     const data = await this.txRequest.requestData()
     this.claimData = {
       claimedBy: data[0][0],
-      claimDeposit: data[2][0].toString(),
-      paymentModifier: data[3][0].toString(),
+      claimDeposit: data[2][0],
+      paymentModifier: data[3][0],
     }
 
     this.meta = {
@@ -164,25 +164,25 @@ class RequestData {
     this.paymentData = {
       feeRecipient: data[0][3],
       bountyBenefactor: data[0][4],
-      fee: data[2][1].toNumber(),
-      feeOwed: data[2][2].toNumber(),
+      fee: data[2][1],
+      feeOwed: data[2][2],
       bounty: data[2][3],
-      bountyOwed: data[2][4].toNumber(),
+      bountyOwed: data[2][4],
     }
 
     this.schedule = {
-      claimWindowSize: data[2][5].toNumber(),
-      freezePeriod: data[2][6].toNumber(),
-      reservedWindowSize: data[2][7].toNumber(),
-      temporalUnit: data[2][8].toNumber(),
-      windowSize: data[2][9].toNumber(),
-      windowStart: data[2][10].toNumber(),
+      claimWindowSize: data[2][5],
+      freezePeriod: data[2][6],
+      reservedWindowSize: data[2][7],
+      temporalUnit: data[2][8],
+      windowSize: data[2][9],
+      windowStart: data[2][10],
     }
 
     this.txData = {
-      callGas: data[2][11].toNumber(),
-      callValue: data[2][12].toNumber(),
-      gasPrice: data[2][13].toNumber(),
+      callGas: data[2][11],
+      callValue: data[2][12],
+      gasPrice: data[2][13],
       toAddress: data[0][5],
     }
   }
@@ -190,11 +190,11 @@ class RequestData {
   calcEndowment() {
     return (
       this.paymentData.bounty
-            + (this.paymentData.fee * 2)
-            + (this.txData.callGas * this.txData.gasPrice)
-            + (180000 * this.txData.gasPrice)
-            + this.txData.callValue
-    )
+            .add(this.paymentData.fee.mul(toBN(2)))
+            .add(this.txData.callGas.mul(this.txData.gasPrice))
+            .add(toBN(180000).mul(this.txData.gasPrice))
+            .add(toBN(this.txData.callValue))
+    );
   }
 }
 

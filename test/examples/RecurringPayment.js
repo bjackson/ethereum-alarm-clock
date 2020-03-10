@@ -42,9 +42,9 @@ contract("Recurring payments", (accounts) => {
     )
 
     const paymentInterval = 50
-    const paymentValue = toBN(10).pow(17); // 0.1 ETH
+    const paymentValue = toBN(10).pow(toBN(17)); // 0.1 ETH
     let numberOfIntervals = 3
-    const expectedPayout = toBN(numberOfIntervals).multipliedBy(paymentValue);
+    const expectedPayout = toBN(numberOfIntervals).mul(paymentValue);
     const recipient = accounts[1]
     const miner = accounts[2]
 

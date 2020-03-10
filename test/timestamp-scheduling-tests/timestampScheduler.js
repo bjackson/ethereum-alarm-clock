@@ -15,6 +15,7 @@ const ethUtil = require("ethereumjs-util")
 // Brings in config.web3 (v1.0.0)
 const config = require("../../config")
 const { RequestData, computeEndowment } = require("../dataHelpers.js")
+const { toBN } = config.web3.utils;
 
 contract("Timestamp scheduling", (accounts) => {
   const MINUTE = 60 // seconds
@@ -49,11 +50,11 @@ contract("Timestamp scheduling", (accounts) => {
   })
 
   it("should do timestamp scheduling using `schedule", async () => {
-    const curBlock = await config.web3.eth.getBlock("latest")
-    const { timestamp } = curBlock
-    const windowStart = timestamp + (10 * MINUTE)
-    const fee = 98765
-    const bounty = 80008
+    const curBlock = await config.web3.eth.getBlock("latest");
+    const { timestamp } = curBlock;
+    const windowStart = timestamp + (10 * MINUTE);
+    const fee = toBN(98765);
+    const bounty = toBN(80008);
 
     const scheduleTx = await timestampScheduler.schedule(
       transactionRecorder.address,
@@ -98,15 +99,15 @@ contract("Timestamp scheduling", (accounts) => {
 
     expect(requestData.schedule.windowSize).to.equal(55 * MINUTE)
 
-    expect(requestData.txData.callGas).to.equal(1212121)
+    expect(requestData.txData.callGas).to.equal('1212121')
 
-    expect(requestData.paymentData.fee).to.equal(fee)
+    expect(requestData.paymentData.fee.toString()).to.equal(fee.toString())
 
-    expect(requestData.paymentData.bounty).to.equal(bounty)
+    expect(requestData.paymentData.bounty.toString()).to.equal(bounty.toString())
 
     expect(requestData.schedule.windowStart).to.equal(windowStart)
 
-    expect(requestData.txData.gasPrice).to.equal(gasPrice)
+    expect(requestData.txData.gasPrice.toString()).to.equal(gasPrice.toString())
 
     expect(requestData.claimData.requiredDeposit).to.equal(parseInt(requiredDeposit, 10))
   })

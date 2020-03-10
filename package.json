@@ -15,7 +15,8 @@
         "solium": "./node_modules/solium/bin/solium.js -d contracts --fix",
         "clean": "truffle networks --clean",
         "migrate-reset": "truffle migrate --reset",
-        "truffle-version": "truffle version"
+        "truffle-version": "truffle version",
+        "ganache": "ganache-cli -m \"shove afford modify census bridge good random error fault floor fringe oblige\" -i 1002"
     },
     "repository": {
         "type": "git",

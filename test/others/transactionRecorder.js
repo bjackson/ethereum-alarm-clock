@@ -22,14 +22,14 @@ contract("Test TransactionRecorder", (accounts) => {
     lastCaller.should.equal("0x0000000000000000000000000000000000000000")
     lastCallValue.toNumber().should.equal(0)
     lastCallGas.toNumber().should.equal(0)
-    lastCallData.should.equal("0x")
+    expect(lastCallData).to.equal(null)
 
-    const testCallData = config.web3.utils.toHex("this-is-call-data")
+    const testCallData = config.web3.utils.fromAscii("this-is-call-data")
 
     await txRecorder.sendTransaction({
       value: 121212,
       gas: 3000000,
-      data: "this-is-call-data",
+      data: web3.utils.fromAscii("this-is-call-data"),
     })
 
     wasCalled = await txRecorder.wasCalled()
@@ -54,8 +54,9 @@ contract("Test TransactionRecorder", (accounts) => {
 
     // Here we take out the `0x` of the test call data in hex representation
     //  and also remove the first 4 hex characters from the call data.
+    // NOTE: Why did they do this? Doesn't seem to work now.
     expect(
-      testCallData.slice(2) === lastCallData.slice(6),
+      testCallData === lastCallData,
       "The call data should be the same."
     ).to.be.true
   })

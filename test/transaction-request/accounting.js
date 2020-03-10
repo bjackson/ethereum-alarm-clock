@@ -86,7 +86,7 @@ contract("Test accounting", async (accounts) => {
 
     const requestData = await RequestData.from(txRequest)
 
-    expect(requestData.paymentData.fee).to.equal(fee)
+    expect(requestData.paymentData.fee).to.equal(toBN(fee))
 
     expect(requestData.paymentData.bounty.toString()).to.equal(bounty.toString())
 
@@ -128,9 +128,8 @@ contract("Test accounting", async (accounts) => {
 
     expect(bountyAmt - expectedBounty).to.be.below(120000 * gasPrice)
 
-    expect(toBN(afterBountyBal)
-      .sub(toBN(beforeBountyBal))
-      .toNumber()).to.equal(bountyAmt - gasCost - 1) // FIXME: Is this an off-by-one error?
+    expect(toBN(afterBountyBal).sub(toBN(beforeBountyBal)).toString())
+    .to.equal(toBN(bountyAmt).sub(toBN(gasCost)).toString());
   })
 
   // / 2
@@ -467,8 +466,8 @@ contract("Test accounting", async (accounts) => {
 
     expect(bountyAmt - expectedBounty).to.be.below(120000 * gasPrice)
 
-    expect(toBN(afterBountyBal).sub(toBN(beforeBountyBal)).toNumber())
-      .to.equal(toBN(bountyAmt) - toBN(gasCost) - toBN(1))
+    expect(toBN(afterBountyBal).sub(toBN(beforeBountyBal)).toString())
+      .to.equal(toBN(bountyAmt).sub(toBN(gasCost)).toString());
   })
 
   it("tests claim deposit returned even if returning it throws", async () => {

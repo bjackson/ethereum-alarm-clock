@@ -240,7 +240,7 @@ contract("Block claiming", async (accounts) => {
 
     const expectedPaymentModifier = Math.floor((100 * 2) / 3)
 
-    expect(requestData.claimData.paymentModifier).to.equal(0)
+    expect(requestData.claimData.paymentModifier).to.equal(toBN(0))
 
     expect(claimAt).to.be.above(await config.web3.eth.getBlockNumber())
 

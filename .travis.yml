@@ -2,7 +2,7 @@ sudo: required
 dist: trusty
 language: node_js
 node_js:
-  - '8.0.0'
+  - '13.5.0'
 install:
   - npm install -g truffle
   - truffle version
@@ -18,4 +18,3 @@ before_script:
 # after_script:
 #   - npm run coverage && cat coverage/lcov.info | coveralls
 
-  

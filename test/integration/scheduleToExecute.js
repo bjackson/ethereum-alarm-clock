@@ -87,7 +87,7 @@ contract("Schedule to execution flow", (accounts) => {
 
     expect(await txRequest.callData()).to.equal(testData)
 
-    expect(requestData.schedule.windowSize).to.equal(365)
+    expect(requestData.schedule.windowSize.toString()).to.equal('365')
 
     expect(requestData.txData.callGas).to.equal('1212121')
 
@@ -95,11 +95,11 @@ contract("Schedule to execution flow", (accounts) => {
 
     expect(requestData.schedule.windowStart).to.equal(windowStart)
 
-    expect(requestData.txData.gasPrice).to.equal(parseInt(gasPrice, 10))
+    expect(requestData.txData.gasPrice).to.equal(parseInt(gasPrice, 10).toString())
 
     expect(requestData.paymentData.fee).to.equal(98765)
 
-    expect(requestData.paymentData.bounty).to.equal(80008)
+    expect(requestData.paymentData.bounty.toString()).to.equal('80008')
   })
 
   it("should claim from an account", async () => {

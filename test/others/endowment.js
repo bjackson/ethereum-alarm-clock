@@ -37,8 +37,8 @@ contract("PaymentLib", () => {
 
     const expectedEndowment = bounty
       .add(fee)
-      .add(callGas.multipliedBy(gasPrice))
-      .add(gasPrice.multipliedBy(180000))
+      .add(callGas.mul(gasPrice))
+      .add(gasPrice.mul(toBN(180000)))
       .add(callValue)
 
     const endowment = await paymentLib.computeEndowment(
@@ -47,7 +47,7 @@ contract("PaymentLib", () => {
       callGas,
       callValue,
       gasPrice,
-      180000
+      toBN(180000)
     )
 
     expect(endowment.sub(expectedEndowment).toNumber()).to.equal(0)
@@ -64,8 +64,8 @@ contract("PaymentLib", () => {
 
     const expectedEndowment = bounty
       .add(fee)
-      .add(callGas.multipliedBy(gasPrice))
-      .add(gasPrice.multipliedBy(180000))
+      .add(callGas.mul(gasPrice))
+      .add(gasPrice.mul(toBN(180000)))
       .add(callValue)
 
     const endowment = await paymentLib.computeEndowment(
@@ -74,7 +74,7 @@ contract("PaymentLib", () => {
       callGas,
       callValue,
       gasPrice,
-      180000
+      toBN(180000)
     )
 
     expect(endowment.sub(expectedEndowment)).to.equal(0)
