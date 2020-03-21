@@ -25,7 +25,7 @@ const execute = async (payment, miner, numberOfBlocks) => {
   const currentBlock = await config.web3.eth.getBlockNumber();
   await waitUntilBlock(0, toBN(currentBlock).add(toBN(numberOfBlocks)).toNumber());
 
-  const scheduledTransaction = TransactionRequestInterface.at(scheduledTransactionAddress);
+  const scheduledTransaction = await TransactionRequestInterface.at(scheduledTransactionAddress);
   await scheduledTransaction.execute({ from: miner, gas: 3000000, gasPrice: 20000000000 });
 };
 
@@ -61,9 +61,9 @@ contract("Delayed payment", (accounts) => {
     expect(recipientBalanceAfter).to.bignumber.equals(recipientBalance.add(paymentValue));
 
     const scheduledPaymentBalance = await getBalance(await payment.payment());
-    expect(scheduledPaymentBalance).to.bignumber.equals(0, "scheduledPaymentBalance should be 0");
+    expect(scheduledPaymentBalance).to.bignumber.equals('0', "scheduledPaymentBalance should be 0");
 
     const paymentContractBalance = await getBalance(payment.address);
-    expect(paymentContractBalance).to.bignumber.equals(0, "paymentContractBalance should be 0");
+    expect(paymentContractBalance).to.bignumber.equals('0', "paymentContractBalance should be 0");
   });
 });

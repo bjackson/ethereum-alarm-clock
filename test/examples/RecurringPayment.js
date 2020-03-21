@@ -24,7 +24,7 @@ const execute = async (recurringPayment, paymentInterval, miner) => {
   const currentBlock = toBN(await config.web3.eth.getBlockNumber());
   await waitUntilBlock(0, currentBlock.add(paymentInterval).toNumber());
 
-  const scheduledTransaction = TransactionRequestInterface.at(scheduledTransactionAddress);
+  const scheduledTransaction = await TransactionRequestInterface.at(scheduledTransactionAddress);
   await scheduledTransaction.execute({ from: miner, gas: 3000000, gasPrice: 20000000000 });
 
   const nextScheduledTransactionAddress = await recurringPayment.currentScheduledTransaction();
@@ -60,7 +60,7 @@ contract("Recurring payments", (accounts) => {
       { value: totalPayment }
     );
 
-    const recipientBalance = await getBalance(recipient);
+    const recipientBalance = toBN(await getBalance(recipient));
     /* eslint no-plusplus: "off" */
     /* eslint no-await-in-loop: "off" */
     while (numberOfIntervals > 0) {
@@ -68,7 +68,7 @@ contract("Recurring payments", (accounts) => {
       numberOfIntervals = numberOfIntervals.subn(1);
     }
 
-    const recipientBalanceAfter = await getBalance(recipient);
-    expect(recipientBalanceAfter).to.equals(recipientBalance.add(expectedPayout));
+    const recipientBalanceAfter = toBN(await getBalance(recipient));
+    expect(recipientBalanceAfter).to.bignumber.equals(recipientBalance.add(expectedPayout));
   });
 });
