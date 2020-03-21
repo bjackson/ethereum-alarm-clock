@@ -1,55 +1,58 @@
 require("chai")
   .use(require("chai-as-promised"))
-  .should()
+  .use(require('chai-bn')(web3.utils.BN))
+  .should();
 
-const { expect } = require("chai")
+const { expect } = require("chai");
 
 // Contracts
-const TransactionRecorder = artifacts.require("./TransactionRecorder.sol")
-const TransactionRequestCore = artifacts.require("./TransactionRequestCore.sol")
+const TransactionRecorder = artifacts.require("./TransactionRecorder.sol");
+const TransactionRequestCore = artifacts.require("./TransactionRequestCore.sol");
 
-const { waitUntilBlock } = require("@digix/tempo")(web3)
+const { waitUntilBlock } = require("@digix/tempo")(web3);
 
 // Bring in config.web3 (v1.0.0)
-const config = require("../../config")
+const config = require("../../config");
 const {
   RequestData,
   parseRequestData,
   parseAbortData,
   wasAborted,
-} = require("../dataHelpers.js")
+} = require("../dataHelpers.js");
 
-const MINUTE = 60 // seconds
-const HOUR = 60 * MINUTE
-const DAY = 24 * HOUR
+const { toBN } = web3.utils;
+
+const MINUTE = 60; // seconds
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
 
 contract("Timestamp execution", async (accounts) => {
-  let txRecorder
-  let txRequest
+  let txRecorder;
+  let txRequest;
 
-  const gasPrice = config.web3.utils.toWei("37", "gwei")
-  const requiredDeposit = config.web3.utils.toWei("60", "kwei")
+  const gasPrice = config.web3.utils.toWei("37", "gwei");
+  const requiredDeposit = config.web3.utils.toWei("60", "kwei");
 
   // / Constant variables we need in each test
-  const claimWindowSize = 5 * MINUTE
-  const freezePeriod = 2 * MINUTE
-  const reservedWindowSize = 1 * MINUTE
-  const executionWindow = 2 * MINUTE
+  const claimWindowSize = toBN(5 * MINUTE);
+  const freezePeriod = toBN(2 * MINUTE);
+  const reservedWindowSize = toBN(1 * MINUTE);
+  const executionWindow = toBN(2 * MINUTE);
 
   beforeEach(async () => {
-    const curBlock = await config.web3.eth.getBlock("latest")
-    const { timestamp } = curBlock
-    const windowStart = timestamp + (DAY * 10)
+    const curBlock = await config.web3.eth.getBlock("latest");
+    const { timestamp } = curBlock;
+    const windowStart = timestamp + (DAY * 10);
 
     // / Deploy a fresh transactionRecorder
-    txRecorder = await TransactionRecorder.new()
+    txRecorder = await TransactionRecorder.new();
     expect(
       txRecorder.address,
       "transactionRecorder should be fresh for each test"
-    ).to.exist
+    ).to.exist;
 
     // / Make a transactionRequest
-    txRequest = await TransactionRequestCore.new()
+    txRequest = await TransactionRequestCore.new();
     await txRequest.initialize(
       [
         accounts[0], // createdBy
@@ -73,29 +76,29 @@ contract("Timestamp execution", async (accounts) => {
       ],
       web3.utils.fromAscii("some-call-data-goes-here"),
       { value: config.web3.utils.toWei("1") }
-    )
+    );
 
-    const requestData = await RequestData.from(txRequest)
+    const requestData = await RequestData.from(txRequest);
 
     const firstClaimStamp = requestData.schedule.windowStart
       - requestData.schedule.freezePeriod
-      - requestData.schedule.claimWindowSize
+      - requestData.schedule.claimWindowSize;
 
     const secondsToWait = firstClaimStamp
-      - (await config.web3.eth.getBlock("latest")).timestamp
+      - (await config.web3.eth.getBlock("latest")).timestamp;
 
     await waitUntilBlock(
       secondsToWait,
       1
-    )
+    );
 
     const claimTx = await txRequest.claim({
       from: accounts[1],
       value: config.web3.utils.toWei("1"),
-    })
+    });
 
-    expect(claimTx.receipt).to.exist
-  })
+    expect(claimTx.receipt).to.exist;
+  });
 
   // ///////////
   // / Tests ///
@@ -103,122 +106,123 @@ contract("Timestamp execution", async (accounts) => {
 
   // / 1
   it("should reject execution if its before the execution window", async () => {
-    const requestData = await parseRequestData(txRequest)
+    const requestData = await parseRequestData(txRequest);
 
-    expect(await txRecorder.wasCalled()).to.be.false
+    expect(await txRecorder.wasCalled()).to.be.false;
 
-    expect(requestData.meta.wasCalled).to.be.false
+    expect(requestData.meta.wasCalled).to.be.false;
 
-    expect((await config.web3.eth.getBlock("latest")).timestamp).to.be.below(requestData.schedule.windowStart)
+    expect(toBN((await config.web3.eth.getBlock("latest")).timestamp))
+      .to.be.bignumber.below(requestData.schedule.windowStart);
 
     const executeTx = await txRequest.execute({
       from: accounts[1],
       gas: 3000000,
-    })
+    });
 
-    const requestDataRefresh = await parseRequestData(txRequest)
+    const requestDataRefresh = await parseRequestData(txRequest);
 
-    expect(await txRecorder.wasCalled()).to.be.false
+    expect(await txRecorder.wasCalled()).to.be.false;
 
-    expect(requestDataRefresh.meta.wasCalled).to.be.false
+    expect(requestDataRefresh.meta.wasCalled).to.be.false;
 
-    expect(wasAborted(executeTx)).to.be.true
+    expect(wasAborted(executeTx)).to.be.true;
 
-    expect(parseAbortData(executeTx).find(reason => reason === "BeforeCallWindow")).to.exist
-  })
+    expect(parseAbortData(executeTx).find((reason) => reason === "BeforeCallWindow")).to.exist;
+  });
 
   // / 2
   it("should reject execution if its after the execution window", async () => {
-    const requestData = await parseRequestData(txRequest)
+    const requestData = await parseRequestData(txRequest);
 
-    expect(await txRecorder.wasCalled()).to.be.false
+    expect(await txRecorder.wasCalled()).to.be.false;
 
-    expect(requestData.meta.wasCalled).to.be.false
+    expect(requestData.meta.wasCalled).to.be.false;
 
-    const endExecutionWindow = requestData.schedule.windowStart + requestData.schedule.windowSize
-    const secsToWait = endExecutionWindow - (await config.web3.eth.getBlock("latest")).timestamp
+    const endExecutionWindow = requestData.schedule.windowStart + requestData.schedule.windowSize;
+    const secsToWait = endExecutionWindow - (await config.web3.eth.getBlock("latest")).timestamp;
 
-    await waitUntilBlock(secsToWait + 1, 1)
+    await waitUntilBlock(secsToWait + 1, 1);
 
     const executeTx = await txRequest.execute({
       from: accounts[1],
       gas: 3000000,
-    })
+    });
 
-    const requestDataRefresh = await parseRequestData(txRequest)
+    const requestDataRefresh = await parseRequestData(txRequest);
 
-    expect(await txRecorder.wasCalled()).to.be.false
+    expect(await txRecorder.wasCalled()).to.be.false;
 
-    expect(requestDataRefresh.meta.wasCalled).to.be.false
+    expect(requestDataRefresh.meta.wasCalled).to.be.false;
 
-    expect(wasAborted(executeTx)).to.be.true
+    expect(wasAborted(executeTx)).to.be.true;
 
-    expect(parseAbortData(executeTx).find(reason => reason === "AfterCallWindow")).to.exist
-  })
+    expect(parseAbortData(executeTx).find((reason) => reason === "AfterCallWindow")).to.exist;
+  });
 
   // / 3
   it("should allow execution at the start of the execution window", async () => {
-    const requestData = await parseRequestData(txRequest)
+    const requestData = await parseRequestData(txRequest);
 
-    expect(await txRecorder.wasCalled()).to.be.false
+    expect(await txRecorder.wasCalled()).to.be.false;
 
-    expect(requestData.meta.wasCalled).to.be.false
+    expect(requestData.meta.wasCalled).to.be.false;
 
-    const startExecutionWindow = requestData.schedule.windowStart
+    const startExecutionWindow = requestData.schedule.windowStart;
     const secsToWait = startExecutionWindow
-      - (await config.web3.eth.getBlock("latest")).timestamp
+      - (await config.web3.eth.getBlock("latest")).timestamp;
     // console.log(secsToWait)
-    await waitUntilBlock(secsToWait, 1)
+    await waitUntilBlock(secsToWait, 1);
 
-    const balBeforeExecute = await config.web3.eth.getBalance(accounts[1])
+    const balBeforeExecute = await config.web3.eth.getBalance(accounts[1]);
 
     const executeTx = await txRequest.execute({
       from: accounts[1],
       gas: 3000000,
       gasPrice,
-    })
-    expect(executeTx.receipt).to.exist
+    });
+    expect(executeTx.receipt).to.exist;
 
-    const balAfterExecute = await config.web3.eth.getBalance(accounts[1])
+    const balAfterExecute = await config.web3.eth.getBalance(accounts[1]);
 
-    expect(parseInt(balAfterExecute, 10)).to.be.at.least(parseInt(balBeforeExecute, 10))
+    expect(parseInt(balAfterExecute, 10)).to.be.at.least(parseInt(balBeforeExecute, 10));
 
-    const requestDataRefresh = await parseRequestData(txRequest)
+    const requestDataRefresh = await parseRequestData(txRequest);
 
-    expect(await txRecorder.wasCalled()).to.be.true
+    expect(await txRecorder.wasCalled()).to.be.true;
 
-    expect(requestDataRefresh.meta.wasCalled).to.be.true
-  })
+    expect(requestDataRefresh.meta.wasCalled).to.be.true;
+  });
 
   // / 4
   it("should allow execution at the end of the execution window", async () => {
-    const requestData = await parseRequestData(txRequest)
+    const requestData = await parseRequestData(txRequest);
 
-    expect(await txRecorder.wasCalled()).to.be.false
+    expect(await txRecorder.wasCalled()).to.be.false;
 
-    expect(requestData.meta.wasCalled).to.be.false
+    expect(requestData.meta.wasCalled).to.be.false;
 
-    const endExecutionWindow = requestData.schedule.windowStart + requestData.schedule.windowSize
-    const secsToWait = endExecutionWindow - (await config.web3.eth.getBlock("latest")).timestamp
-    await waitUntilBlock(secsToWait - 1, 1)
+    const endExecutionWindow = requestData.schedule.windowStart.add(requestData.schedule.windowSize);
+    const secsToWait = endExecutionWindow.sub(toBN((await config.web3.eth.getBlock("latest")).timestamp)).toNumber();
+    await waitUntilBlock(secsToWait - 1, 1);
 
-    const balBeforeExecute = await config.web3.eth.getBalance(accounts[5])
+    const balBeforeExecute = await config.web3.eth.getBalance(accounts[5]);
 
     const executeTx = await txRequest.execute({
       from: accounts[5],
       gas: 3000000,
       gasPrice,
-    })
-    expect(executeTx.receipt).to.exist
+    });
+    expect(executeTx.receipt).to.exist;
 
-    const balAfterExecute = await config.web3.eth.getBalance(accounts[5])
+    const balAfterExecute = await config.web3.eth.getBalance(accounts[5]);
 
-    expect(parseInt(balAfterExecute, 10)).to.be.at.least(parseInt(balBeforeExecute, 10))
+    expect(parseInt(balAfterExecute, 10)).to.be.at.least(parseInt(balBeforeExecute, 10));
 
-    const requestDataRefresh = await parseRequestData(txRequest)
+    const requestDataRefresh = await parseRequestData(txRequest);
 
-    expect(await txRecorder.wasCalled()).to.be.true
+    expect(await txRecorder.wasCalled()).to.be.true;
 
-    expect(requestDataRefresh.meta.wasCalled).to.be.true
-  })
-})
+    expect(requestDataRefresh.meta.wasCalled).to.be.true;
+  });
+});

@@ -10,9 +10,12 @@
         "contract": "readonly"
     },
     "rules": {
-        "semi": "off",
+        "semi": "warn",
         "quotes": "off",
         "no-unused-expressions": "off",
-        "comma-dangle": "off"
+        "comma-dangle": "off",
+        "max-len": ["warn", {
+            "code": 120
+        }]
     }
 }

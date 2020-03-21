@@ -1,33 +1,36 @@
 require("chai")
   .use(require("chai-as-promised"))
-  .should()
+  .use(require('chai-bn')(web3.utils.BN))
+  .should();
 
-const { expect } = require("chai")
+const { expect } = require("chai");
 
 // Contracts
-const TransactionRequestCore = artifacts.require("./TransactionRequestCore.sol")
-const TransactionRecorder = artifacts.require("./TransactionRecorder.sol")
+const TransactionRequestCore = artifacts.require("./TransactionRequestCore.sol");
+const TransactionRecorder = artifacts.require("./TransactionRecorder.sol");
 
-const { waitUntilBlock } = require("@digix/tempo")(web3)
+const { waitUntilBlock } = require("@digix/tempo")(web3);
 
 // Brings in config.web3 (v1.0.0)
-const config = require("../../config")
-const { RequestData, parseAbortData, wasAborted } = require("../dataHelpers.js")
+const config = require("../../config");
+const { RequestData, parseAbortData, wasAborted } = require("../dataHelpers.js");
+
+const { toBN } = web3.utils;
 
 contract("Block reserved window", (accounts) => {
   // 1
   it("should reject execution if claimed by another", async () => {
-    const txRecorder = await TransactionRecorder.new()
-    expect(txRecorder.address).to.exist
+    const txRecorder = await TransactionRecorder.new();
+    expect(txRecorder.address).to.exist;
 
-    const curBlock = await config.web3.eth.getBlockNumber()
-    const windowStart = curBlock + 38
-    const executionWindow = 10
+    const curBlock = await config.web3.eth.getBlockNumber();
+    const windowStart = toBN(curBlock + 38);
+    const executionWindow = toBN(10);
 
-    const gasPrice = config.web3.utils.toWei("12", "gwei")
-    const requiredDeposit = config.web3.utils.toWei("66", "kwei")
+    const gasPrice = config.web3.utils.toWei("12", "gwei");
+    const requiredDeposit = config.web3.utils.toWei("66", "kwei");
 
-    const txRequest = await TransactionRequestCore.new()
+    const txRequest = await TransactionRequestCore.new();
     await txRequest.initialize(
       [
         accounts[0], // created by
@@ -50,39 +53,39 @@ contract("Block reserved window", (accounts) => {
         requiredDeposit,
       ],
       web3.utils.fromAscii("this-is-the-call-data"),
-    )
+    );
 
-    const requestData = await RequestData.from(txRequest)
+    const requestData = await RequestData.from(txRequest);
 
-    const claimAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 10
-    await waitUntilBlock(0, claimAt)
+    const claimAt = requestData.schedule.windowStart.sub(requestData.schedule.freezePeriod).subn(10);
+    await waitUntilBlock(0, claimAt);
 
     const claimTx = await txRequest.claim({
       from: accounts[7],
       value: config.web3.utils.toWei("2"),
-    })
-    expect(claimTx.receipt).to.exist
+    });
+    expect(claimTx.receipt).to.exist;
 
-    await requestData.refresh()
+    await requestData.refresh();
 
-    expect(requestData.claimData.claimedBy).to.equal(accounts[7])
+    expect(requestData.claimData.claimedBy).to.equal(accounts[7]);
 
-    await waitUntilBlock(0, requestData.schedule.windowStart)
+    await waitUntilBlock(0, requestData.schedule.windowStart);
 
-    expect(await txRecorder.wasCalled()).to.be.false
+    expect(await txRecorder.wasCalled()).to.be.false;
 
-    expect(requestData.meta.wasCalled).to.be.false
+    expect(requestData.meta.wasCalled).to.be.false;
 
-    const executeTx = await txRequest.execute({ gas: 3000000 })
+    const executeTx = await txRequest.execute({ gas: 3000000 });
 
-    await requestData.refresh()
+    await requestData.refresh();
 
-    expect(await txRecorder.wasCalled()).to.be.false
+    expect(await txRecorder.wasCalled()).to.be.false;
 
-    expect(requestData.meta.wasCalled).to.be.false
+    expect(requestData.meta.wasCalled).to.be.false;
 
-    expect(wasAborted(executeTx)).to.be.true
+    expect(wasAborted(executeTx)).to.be.true;
 
-    expect(parseAbortData(executeTx).find(reason => reason === "ReservedForClaimer")).to.exist
-  })
-})
+    expect(parseAbortData(executeTx).find((reason) => reason === "ReservedForClaimer")).to.exist;
+  });
+});
