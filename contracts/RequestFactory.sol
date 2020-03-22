@@ -7,13 +7,11 @@ import "contracts/IterTools.sol";
 import "contracts/CloneFactory.sol";
 import "contracts/Library/RequestScheduleLib.sol";
 
-import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
-
 /**
  * @title RequestFactory
  * @dev Contract which will produce new TransactionRequests.
  */
-contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
+contract RequestFactory is RequestFactoryInterface, CloneFactory {
     using IterTools for bool[6];
 
     TransactionRequestCore public transactionRequestCore;
@@ -56,7 +54,6 @@ contract RequestFactory is RequestFactoryInterface, CloneFactory, Pausable {
         uint[12] memory   _uintArgs,
         bytes memory      _callData
     )
-        whenNotPaused
         public override payable returns (address)
     {
         // Create a new transaction request clone from transactionRequestCore.

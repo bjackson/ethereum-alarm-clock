@@ -11,7 +11,6 @@ const RequestLib = artifacts.require("./RequestLib.sol");
 const TransactionRequestCore = artifacts.require("./TransactionRequestCore.sol");
 
 // Brings in config.web3 (v1.0.0)
-const ethUtil = require("ethereumjs-util");
 const config = require("../../config");
 const { parseRequestData, calculateBlockBucket } = require("../dataHelpers.js");
 
@@ -283,7 +282,7 @@ contract("Request factory", async (accounts) => {
     expect(requestData.txData.toAddress).to.equal(accounts[2]);
   });
 
-  it("should not allow the deployment of new requests when paused", async () => {
+  it.skip("should not allow the deployment of new requests when paused", async () => {
     await requestFactory.pause();
     const isPaused = await requestFactory.paused();
     assert(isPaused, "RequestFactory should be paused now.");
