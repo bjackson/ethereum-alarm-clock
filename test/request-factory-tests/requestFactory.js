@@ -15,7 +15,10 @@ const ethUtil = require("ethereumjs-util");
 const config = require("../../config");
 const { parseRequestData, calculateBlockBucket } = require("../dataHelpers.js");
 
-const { toBN } = web3.utils;
+const {
+  toBN,
+  fromAscii,
+} = web3.utils;
 
 
 const NULL_ADDR = "0x0000000000000000000000000000000000000000";
@@ -39,8 +42,8 @@ contract("Request factory", async (accounts) => {
     callGas: 1000000,
     gasPrice: 1000000,
     requiredDeposit: 1000000,
-    testCallData: "this-is-call-data",
-    endowment: toBN(10).pow(18)
+    testCallData: fromAscii("this-is-call-data"),
+    endowment: toBN(10).pow(toBN(18))
   };
 
   const getWindowStart = async () => (await config.web3.eth.getBlockNumber()) + 20;
@@ -102,8 +105,8 @@ contract("Request factory", async (accounts) => {
     isValid.forEach((bool) => expect(bool).to.be.true);
 
     const params = paramsForValidation;
-    params.push(transactionRequest.gasPrice);
-    params.push(transactionRequest.requiredDeposit);
+    // params.push(transactionRequest.gasPrice);
+    // params.push(transactionRequest.requiredDeposit);
 
     // Create a request with the same args we validated
     const createTx = await requestFactory.createRequest(
@@ -144,41 +147,42 @@ contract("Request factory", async (accounts) => {
 
     expect(requestData.claimData.claimedBy).to.equal(NULL_ADDR);
 
-    expect(requestData.claimData.claimDeposit).to.equal(0);
+    expect(requestData.claimData.claimDeposit).to.be.a.bignumber.that.is.equal('0');
 
-    expect(requestData.claimData.paymentModifier).to.equal(0);
+    expect(requestData.claimData.paymentModifier).to.be.bignumber.equal('0');
 
-    expect(requestData.paymentData.fee).to.equal(transactionRequest.fee);
+    expect(requestData.paymentData.fee).to.bignumber.equal(transactionRequest.fee.toString());
 
     expect(requestData.paymentData.feeRecipient).to.equal(accounts[1]);
 
-    expect(requestData.paymentData.feeOwed).to.equal(0);
+    expect(requestData.paymentData.feeOwed).to.be.bignumber.equal('0');
 
-    expect(requestData.paymentData.bounty).to.equal(transactionRequest.bounty);
+    expect(requestData.paymentData.bounty).to.be.bignumber.equal(toBN(transactionRequest.bounty));
 
     expect(requestData.paymentData.bountyBenefactor).to.equal(NULL_ADDR);
 
-    expect(requestData.paymentData.bountyOwed).to.equal(0);
+    expect(requestData.paymentData.bountyOwed).to.be.bignumber.equal('0');
 
-    expect(requestData.schedule.claimWindowSize).to.equal(transactionRequest.claimWindowSize);
+    expect(requestData.schedule.claimWindowSize).to.bignumber.equal(toBN(transactionRequest.claimWindowSize));
 
-    expect(requestData.schedule.freezePeriod).to.equal(transactionRequest.freezePeriod);
+    expect(requestData.schedule.freezePeriod).to.bignumber.equal(toBN(transactionRequest.freezePeriod));
 
-    expect(requestData.schedule.windowStart).to.equal(windowStart);
+    expect(requestData.schedule.windowStart).to.bignumber.equal(toBN(windowStart));
 
-    expect(requestData.schedule.reservedWindowSize).to.equal(transactionRequest.reservedWindowSize);
+    expect(requestData.schedule.reservedWindowSize).to.bignumber.equal(toBN(transactionRequest.reservedWindowSize));
 
-    expect(requestData.schedule.temporalUnit).to.equal(1);
+    expect(requestData.schedule.temporalUnit).to.bignumber.equal('1');
 
     expect(requestData.txData.toAddress).to.equal(accounts[2]);
 
-    const expectedCallData = ethUtil.bufferToHex(Buffer.from(transactionRequest.testCallData));
+    // const expectedCallData = ethUtil.bufferToHex(Buffer.from(transactionRequest.testCallData));
+    const expectedCallData = transactionRequest.testCallData;
     const callData = await txRequest.callData();
     expect(callData).to.equal(expectedCallData);
 
-    expect(requestData.txData.callValue).to.equal(transactionRequest.callValue);
+    expect(requestData.txData.callValue).to.bignumber.equal(toBN(transactionRequest.callValue));
 
-    expect(requestData.txData.callGas).to.equal(transactionRequest.callGas);
+    expect(requestData.txData.callGas).to.bignumber.equal(toBN(transactionRequest.callGas));
 
     // Lastly, we just make sure that the transaction request
     // address is a known request for the factory.
@@ -244,8 +248,8 @@ contract("Request factory", async (accounts) => {
     const { paramsForValidation } = await validate();
 
     const params = paramsForValidation;
-    params.push(transactionRequest.gasPrice);
-    params.push(transactionRequest.requiredDeposit);
+    // params.push(transactionRequest.gasPrice);
+    // params.push(transactionRequest.requiredDeposit);
 
     // Create a request with the same args we validated
     const createTx = await requestFactory.createRequest(
@@ -290,8 +294,8 @@ contract("Request factory", async (accounts) => {
     isValid.forEach((bool) => expect(bool).to.be.true);
 
     const params = paramsForValidation;
-    params.push(transactionRequest.gasPrice);
-    params.push(transactionRequest.requiredDeposit);
+    // params.push(transactionRequest.gasPrice);
+    // params.push(transactionRequest.requiredDeposit);
 
     // Create a request with the same args we validated
     let res;

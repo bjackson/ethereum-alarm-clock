@@ -18,13 +18,14 @@ const { RequestData, parseAbortData, wasAborted } = require("../dataHelpers.js")
 
 const { toBN } = web3.utils;
 
-const MINUTE = toBN(60); // seconds
-const HOUR = toBN(60).mul(MINUTE);
-const DAY = toBN(24).mul(HOUR);
 
 contract("Timestamp reserved window", async (accounts) => {
   // 1
   it("should reject execution if claimed by another", async () => {
+    const MINUTE = toBN(60); // seconds
+    const HOUR = toBN(60).mul(MINUTE);
+    const DAY = toBN(24).mul(HOUR);
+
     const txRecorder = await TransactionRecorder.new();
     expect(txRecorder.address).to.exist;
 

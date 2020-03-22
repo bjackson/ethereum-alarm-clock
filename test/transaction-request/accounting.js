@@ -17,20 +17,20 @@ const { RequestData } = require("../dataHelpers.js");
 
 const { toBN } = config.web3.utils;
 
-const MINUTE = toBN(60); // seconds
-const HOUR = toBN(60 * MINUTE);
-const DAY = toBN(24 * HOUR);
-
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 contract("Test accounting", async (accounts) => {
   let txRecorder;
 
+  const MINUTE = toBN(60); // seconds
+  const HOUR = toBN(60 * MINUTE);
+  const DAY = toBN(24 * HOUR);
+
   // / Constant variables we need in each test
-  const claimWindowSize = toBN(5 * MINUTE);
-  const freezePeriod = toBN(2 * MINUTE);
-  const reservedWindowSize = toBN(1 * MINUTE);
-  const executionWindow = toBN(2 * MINUTE);
+  const claimWindowSize = toBN(MINUTE.muln(5));
+  const freezePeriod = toBN(MINUTE.muln(2));
+  const reservedWindowSize = toBN(MINUTE.muln(1));
+  const executionWindow = toBN(MINUTE.muln(2));
 
   const feeRecipient = accounts[3];
 
